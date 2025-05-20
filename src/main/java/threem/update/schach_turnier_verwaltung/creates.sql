@@ -3,8 +3,8 @@ Create SEQUENCE person_id_seq
     INCREMENT BY 1;
 
 CREATE SEQUENCE tournaments_id_seq
-    START WITH 1
-    INCREMENT BY 1;
+    START WITH 10000
+    INCREMENT BY 100;
 
 CREATE TABLE persons (personId GENERATED ALWAYS AS IDENTITY PRIMARY KEY, username varchar(20), password varchar(20), admin boolean, wins numeric(4), losses numeric(4), draws numeric(4))
 
