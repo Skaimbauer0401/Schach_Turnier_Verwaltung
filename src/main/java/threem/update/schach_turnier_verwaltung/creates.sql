@@ -5,6 +5,7 @@ Create SEQUENCE person_id_seq
 CREATE SEQUENCE tournaments_id_seq
     START WITH 1
     INCREMENT BY 1;
+--hallo
 
 CREATE TABLE persons (personId GENERATED ALWAYS AS IDENTITY PRIMARY KEY, username varchar(20), password varchar(20), admin boolean, wins numeric(4), losses numeric(4), draws numeric(4))
 
