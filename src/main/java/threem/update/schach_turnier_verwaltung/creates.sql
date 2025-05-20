@@ -3,8 +3,8 @@ Create SEQUENCE person_id_seq
     INCREMENT BY 1;
 
 CREATE SEQUENCE tournaments_id_seq
-    START WITH 1
-    INCREMENT BY 1;
+    START WITH 10000
+    INCREMENT BY 100;
 
 Create Table tournaments (tournamentId numeric(5) primary key, name varchar(30), start_time timestamp, end_time timestamp)
 
