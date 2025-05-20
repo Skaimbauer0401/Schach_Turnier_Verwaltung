@@ -8,7 +8,6 @@ public class Person {
     private String password;
     private ArrayList<Tournament> tounaments;
     private boolean admin;
-    private boolean player;
     private int wins;
     private int losses;
     private int draws;
