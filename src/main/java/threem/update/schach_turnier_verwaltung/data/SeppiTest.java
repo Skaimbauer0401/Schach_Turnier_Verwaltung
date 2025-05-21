@@ -4,7 +4,7 @@ import java.sql.*;
 
 public class SeppiTest {
     public static void main(String[] args) {
-        String url = "jdbc:derby:C:/Users/Sebastian/Desktop/HTL/Schach_GIT/DB/database;create=false";
+        String url = "jdbc:derby:C:/Users/Samuel/Desktop/MGIN_PROJECTS/Schach_Turnier_Verwaltung/DB/database";
         String user = "DBAdmin";
         String password = "DBAdmin";
 
