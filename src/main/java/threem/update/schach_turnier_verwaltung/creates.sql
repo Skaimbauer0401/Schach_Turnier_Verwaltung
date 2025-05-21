@@ -9,4 +9,9 @@ DROP TABLE persons_tournaments;
 DROP TABLE persons;
 DROP TABLE tournaments;
 
-Insert Into persons (username, password, admin, wins, losses, draws) Values ('Skaimbauer','test123',true,10,10,10);
+Insert Into persons (username, password, admin, wins, losses, draws) Values ('test','test123',true,10,10,10);
+INSERT INTO tournaments (name,start_time,end_time) Values ('test123',CURRENT_TIMESTAMP,'2025-05-21 14:30:00');
+
+
+SELECT * FROM persons;
+SELECT * FROM tournaments;
