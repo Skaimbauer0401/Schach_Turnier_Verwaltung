@@ -1,5 +1,6 @@
 package threem.update.schach_turnier_verwaltung.controller;
 
+import org.springframework.boot.json.GsonJsonParser;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,7 +24,7 @@ public class PersonController {
             pstmt.setString(2,password);
             ResultSet rs = pstmt.executeQuery();
             rs.next();
-            Person temp = new Person();
+            Person temp = new Person(rs.getInt("personId"),rs.getString("username"),rs.getString("password"),rs.getBoolean("admin"),rs.getInt("wins"),rs.getInt("losses"),rs.getInt("draws"));
 
 
             con.close();
