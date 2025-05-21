@@ -6,21 +6,16 @@ public class Person {
     private int id;
     private String username;
     private String password;
-    private ArrayList<Tournament> tournaments;
+    private ArrayList<Tournament> tounaments;
     private boolean admin;
     private int wins;
     private int losses;
     private int draws;
 
-    public Person() {
-        this.tournaments = new ArrayList<>();
-    }
-
     public Person(int id, String username, String password, boolean admin, int wins, int losses, int draws) {
         this.id = id;
         this.username = username;
         this.password = password;
-        this.tournaments = new ArrayList<>();
         this.admin = admin;
         this.wins = wins;
         this.losses = losses;
@@ -49,14 +44,6 @@ public class Person {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public ArrayList<Tournament> getTournaments() {
-        return tournaments;
-    }
-
-    public void setTournaments(ArrayList<Tournament> tournaments) {
-        this.tournaments = tournaments;
     }
 
     public boolean isAdmin() {
@@ -89,17 +76,5 @@ public class Person {
 
     public void setDraws(int draws) {
         this.draws = draws;
-    }
-
-    @Override
-    public String toString() {
-        return "Person{" +
-                "id=" + id +
-                ", username='" + username + '\'' +
-                ", admin=" + admin +
-                ", wins=" + wins +
-                ", losses=" + losses +
-                ", draws=" + draws +
-                '}';
     }
 }
