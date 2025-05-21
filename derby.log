@@ -1,12 +1,12 @@
 ----------------------------------------------------------------
-Wed May 21 10:18:36 UTC 2025:
-Booting Derby version The Apache Software Foundation - Apache Derby - 10.16.1.1 - (1901046): instance a816c00e-0196-f25a-2392-0000069853c8 
-on database directory C:\Users\samue\Desktop\mgin\Projekt\Project\Schach_Turnier_Verwaltung\DB\database with class loader com.intellij.database.remote.jdbc.impl.JdbcClassLoader$JdbcClassLoaderImpl@3d24753a 
-Loaded from file:/C:/Users/samue/AppData/Roaming/JetBrains/IntelliJIdea2025.1/jdbc-drivers/Apache%20Derby/10.16.1.1/org/apache/derby/derby/10.16.1.1/derby-10.16.1.1.jar
+Wed May 21 11:55:15 UTC 2025:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.16.1.1 - (1901046): instance a816c00e-0196-f2b2-a299-000007384bb8 
+on database directory C:\Users\Sebastian\Desktop\HTL\Schach_GIT\DB\database with class loader com.intellij.database.remote.jdbc.impl.JdbcClassLoader$JdbcClassLoaderImpl@7c75222b 
+Loaded from file:/C:/Users/Sebastian/AppData/Roaming/JetBrains/IntelliJIdea2024.1/jdbc-drivers/Apache%20Derby/10.16.1.1/org/apache/derby/derby/10.16.1.1/derby-10.16.1.1.jar
 java.vendor=JetBrains s.r.o.
-java.runtime.version=21.0.6+9-b895.109
-user.dir=C:\Users\samue\Desktop\mgin\Projekt\Project\Schach_Turnier_Verwaltung
-os.name=Windows 11
+java.runtime.version=17.0.10+1-b1207.14
+user.dir=C:\Users\Sebastian\Desktop\HTL\Schach_GIT
+os.name=Windows 10
 os.arch=amd64
 os.version=10.0
 derby.system.home=null
