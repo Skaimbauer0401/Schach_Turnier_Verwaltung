@@ -1,9 +1,9 @@
 
-CREATE TABLE persons (personId numeric(5) GENERATED ALWAYS AS IDENTITY PRIMARY KEY, username varchar(20), password varchar(20), admin boolean, wins numeric(4), losses numeric(4), draws numeric(4))
+CREATE TABLE persons (personId INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY, username varchar(20), password varchar(20), admin boolean, wins numeric(4), losses numeric(4), draws numeric(4))
 
-Create Table tournaments (tournamentId numeric(5) GENERATED ALWAYS AS IDENTITY primary key, name varchar(30), start_time timestamp, end_time timestamp)
+Create Table tournaments (tournamentId INT GENERATED ALWAYS AS IDENTITY primary key, name varchar(30), start_time timestamp, end_time timestamp)
 
-Create Table persons_tournaments (personId INT REFERENCES persons(PERSONID), tournamentId numeric(4) REFERENCES tournaments(TOURNAMENTID))
+Create Table persons_tournaments (personId INT REFERENCES persons(PERSONID), tournamentId INT REFERENCES tournaments(TOURNAMENTID))
 
 DROP TABLE persons_tournaments;
 DROP TABLE persons;
