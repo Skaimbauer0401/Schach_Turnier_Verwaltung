@@ -1,6 +1,6 @@
 ----------------------------------------------------------------
-Wed May 21 15:45:02 UTC 2025:
-Booting Derby version The Apache Software Foundation - Apache Derby - 10.16.1.1 - (1901046): instance a816c00e-0196-f385-0158-000007300000 
+Wed May 21 15:55:16 UTC 2025:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.16.1.1 - (1901046): instance a816c00e-0196-f38e-60d9-000007300000 
 on database directory C:\Users\Samuel\Desktop\MGIN_PROJECTS\Schach_Turnier_Verwaltung\DB\database with class loader com.intellij.database.remote.jdbc.impl.JdbcClassLoader$JdbcClassLoaderImpl@7c75222b 
 Loaded from file:/C:/Users/Samuel/AppData/Roaming/JetBrains/IntelliJIdea2024.1/jdbc-drivers/Apache%20Derby/10.16.1.1/org/apache/derby/derby/10.16.1.1/derby-10.16.1.1.jar
 java.vendor=JetBrains s.r.o.
