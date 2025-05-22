@@ -22,6 +22,15 @@ public class Person {
         this.draws = draws;
     }
 
+    public Person( String username, String password, boolean admin, int wins, int losses, int draws) {
+        this.username = username;
+        this.password = password;
+        this.admin = admin;
+        this.wins = wins;
+        this.losses = losses;
+        this.draws = draws;
+    }
+
     public int getId() {
         return id;
     }
