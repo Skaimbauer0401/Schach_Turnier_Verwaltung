@@ -21,3 +21,5 @@ SELECT t.*
 SELECT * FROM persons;
 SELECT * FROM tournaments;
 SELECT * FROM persons_tournaments;
+
+SELECT COUNT(personId) FROM persons WHERE username = 'Skaimbauer';

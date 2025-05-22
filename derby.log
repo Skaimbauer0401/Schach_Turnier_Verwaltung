@@ -1,6 +1,6 @@
 ----------------------------------------------------------------
-Thu May 22 18:31:59 CEST 2025:
-Booting Derby version The Apache Software Foundation - Apache Derby - 10.16.1.1 - (1901046): instance a816c00e-0196-f8d6-590f-0000012e7e08 
+Thu May 22 19:51:19 CEST 2025:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.16.1.1 - (1901046): instance a816c00e-0196-f91e-fd6d-000003239998 
 on database directory C:\Users\Samuel\Desktop\MGIN_PROJECTS\Schach_Turnier_Verwaltung\DB\database with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@5a07e868 
 Loaded from file:/C:/Users/Samuel/.m2/repository/org/apache/derby/derby/10.16.1.1/derby-10.16.1.1.jar
 java.vendor=Oracle Corporation
