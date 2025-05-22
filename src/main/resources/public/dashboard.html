@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>♟️</text></svg>">
+    <title>Chess Player Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .welcome-message {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #e9f7ef;
+            border-radius: 5px;
+        }
+        .person-card {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e9f7ef;
+            border-radius: 5px;
+            border-left: 5px solid #4CAF50;
+        }
+        .person-info {
+            margin-bottom: 10px;
+        }
+        .person-info span {
+            font-weight: bold;
+        }
+        .stats-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+        }
+        .stat-box {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            margin: 0 5px;
+            background-color: #f1f1f1;
+            border-radius: 5px;
+        }
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+        }
+        .logout-btn {
+            background-color: #f44336;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+        .logout-btn:hover {
+            background-color: #d32f2f;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Chess Player Dashboard</h1>
+
+        <div class="welcome-message">
+            Welcome, <span id="welcome-username">Player</span>!
+        </div>
+
+        <div id="person-card" class="person-card">
+            <h2>Your Profile</h2>
+            <div class="person-info">ID: <span id="person-id"></span></div>
+            <div class="person-info">Username: <span id="person-username"></span></div>
+            <div class="person-info">Admin Status: <span id="person-admin"></span></div>
+
+            <div class="stats-container">
+                <div class="stat-box">
+                    <div class="stat-value" id="person-wins">0</div>
+                    <div class="stat-label">Wins</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="person-losses">0</div>
+                    <div class="stat-label">Losses</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="person-draws">0</div>
+                    <div class="stat-label">Draws</div>
+                </div>
+            </div>
+        </div>
+
+        <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+
+    <script>
+        // Check if user data exists in sessionStorage
+        window.onload = function() {
+            const userData = sessionStorage.getItem('userData');
+
+            if (!userData) {
+                // No user data found, redirect back to login
+                window.location.href = 'person-viewer.html';
+                return;
+            }
+
+            // Parse the user data
+            const user = JSON.parse(userData);
+
+            // Debug: Log the user data to the console
+            console.log("User data from sessionStorage:", user);
+
+            // Display the user data
+            document.getElementById('welcome-username').textContent = user.username;
+            // Try both field names for ID
+            document.getElementById('person-id').textContent = user.id || user.personId;
+            document.getElementById('person-username').textContent = user.username;
+            // Try both field names for admin status
+            document.getElementById('person-admin').textContent = (user.admin !== undefined) ? (user.admin ? 'Yes' : 'No') : 'Unknown';
+            // Try both field names for stats
+            document.getElementById('person-wins').textContent = user.wins || 0;
+            document.getElementById('person-losses').textContent = user.losses || 0;
+            document.getElementById('person-draws').textContent = user.draws || 0;
+        };
+
+        // Logout function
+        function logout() {
+            // Clear the session storage
+            sessionStorage.removeItem('userData');
+
+            // Redirect to login page
+            window.location.href = 'person-viewer.html';
+        }
+    </script>
+</body>
+</html>
