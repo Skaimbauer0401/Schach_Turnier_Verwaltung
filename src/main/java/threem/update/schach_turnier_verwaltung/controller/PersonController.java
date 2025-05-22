@@ -40,7 +40,14 @@ public class PersonController {
                     jsonTournaments += objectMapper.writeValueAsString(tournament);
                 }
             }else{
-
+                PreparedStatement ptournstmt = con.prepareStatement("SELECT t.* fROM PERSONS_TOURNAMENTS pt JOIN TOURNAMENTS t ON pt.TOURNAMENTID = t.TOURNAMENTID WHERE pt.personID = ?");
+                ptournstmt.setInt(1,person.getId());
+                ResultSet rstournaments = ptournstmt.executeQuery();
+                ObjectMapper objectMapper = new ObjectMapper();
+                while(rstournaments.next()){
+                    Tournament tournament = new Tournament(rstournaments.getInt("tournamentId"),rstournaments.getString("name"),rstournaments.getDate("start_time"),rstournaments.getDate("end_time"));
+                    jsonTournaments += objectMapper.writeValueAsString(tournament);
+                }
             }
 
             rsPerson.close();
