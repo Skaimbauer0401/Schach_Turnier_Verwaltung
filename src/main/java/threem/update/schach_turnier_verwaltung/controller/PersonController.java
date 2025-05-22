@@ -116,7 +116,9 @@ public class PersonController {
 
             return String.valueOf(result);
         }catch (SQLException e) {
-            throw new RuntimeException(e);
+            return "SQL Fehler";
+        }catch (Exception e){
+            return "Unbekannter Fehler";
         }
     }
 }
