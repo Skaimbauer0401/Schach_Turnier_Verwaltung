@@ -1,5 +1,6 @@
 package threem.update.schach_turnier_verwaltung.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,7 +14,7 @@ import java.sql.*;
 @RestController
 public class PersonController {
 
-    private String url = "jdbc:derby:C:/Users/samue/Desktop/mgin/Projekt/Project/Schach_Turnier_Verwaltung/DB/database";
+    private String url = "jdbc:derby:C:/Users/Samuel/Desktop/MGIN_PROJECTS/Schach_Turnier_Verwaltung/DB/database";
     private String user = "DBAdmin";
     private String dbpassword = "DBAdmin";
 
@@ -59,9 +60,9 @@ public class PersonController {
             return jsonPerson+jsonTournaments;
 
         } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+            return "SQL Fehler";
+        } catch (JsonProcessingException e) {
+            return "Json konvertierung fehlgeschlagen";
         }
     }
 }
