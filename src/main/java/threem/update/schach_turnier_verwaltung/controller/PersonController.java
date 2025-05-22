@@ -131,13 +131,13 @@ public class PersonController {
         //Datenbank verbinden und Person hinzufügen, falls nicht bereits vorhanden
         Connection con = DriverManager.getConnection(url, user, dbpassword);
         Statement stmt = con.createStatement();
-        ResultSet rs = stmt.executeQuery("SELECT username FROM persons");
+        ResultSet rs = stmt.executeQuery("SELECT username FROM persons ORDER BY username ASC");
 
         ObjectMapper objectMapper;
         String jsonPerson = "";
 
-        while(rs.next()){
-            Person person = new Person(1,rs.getString("username") , "x", false, 0, 0, 0);
+        while (rs.next()) {
+            Person person = new Person(1, rs.getString("username"), "x", false, 0, 0, 0);
 
             objectMapper = new ObjectMapper();
             jsonPerson += objectMapper.writeValueAsString(person);
@@ -145,5 +145,26 @@ public class PersonController {
         con.close();
 
         return jsonPerson;
+    }
+
+    @GetMapping("/persons/person/addtournament/{personId}/{tournamentId}")
+    public String addTournament(@PathVariable int personId, @PathVariable int tournamentId) {
+        File file = new File("DB/database");
+        url = "jdbc:derby:" + file.getAbsolutePath();
+
+        //Datenbank verbinden
+        try {
+            Connection con = DriverManager.getConnection(url, user, dbpassword);
+            PreparedStatement pstmt = con.prepareStatement("INSERT INTO persons_tournaments (personID, tournamentID) VALUES (?, ?)");
+            pstmt.setInt(1, personId);
+            pstmt.setInt(2, tournamentId);
+            int i = pstmt.executeUpdate();
+            con.close();
+
+            return String.valueOf(i);
+
+        } catch (SQLException e) {
+            return "SQL Fehler";
+        }
     }
 }
