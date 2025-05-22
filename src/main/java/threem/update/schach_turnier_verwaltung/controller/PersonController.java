@@ -121,4 +121,29 @@ public class PersonController {
             return "Unbekannter Fehler";
         }
     }
+
+    //gibt von allen Personen nur den username an den aufrufer
+    @GetMapping("/persons/allpersons")
+    public String getAllPersons() throws SQLException, JsonProcessingException {
+        File file = new File("DB/database");
+        url = "jdbc:derby:" + file.getAbsolutePath();
+
+        //Datenbank verbinden und Person hinzufügen, falls nicht bereits vorhanden
+        Connection con = DriverManager.getConnection(url, user, dbpassword);
+        Statement stmt = con.createStatement();
+        ResultSet rs = stmt.executeQuery("SELECT username FROM persons");
+
+        ObjectMapper objectMapper;
+        String jsonPerson = "";
+
+        while(rs.next()){
+            Person person = new Person(1,rs.getString("username") , "x", false, 0, 0, 0);
+
+            objectMapper = new ObjectMapper();
+            jsonPerson += objectMapper.writeValueAsString(person);
+        }
+        con.close();
+
+        return jsonPerson;
+    }
 }
