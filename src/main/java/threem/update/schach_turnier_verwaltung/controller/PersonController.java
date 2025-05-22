@@ -2,7 +2,6 @@ package threem.update.schach_turnier_verwaltung.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.derby.shared.common.error.StandardException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -10,7 +9,6 @@ import threem.update.schach_turnier_verwaltung.data.Person;
 import threem.update.schach_turnier_verwaltung.data.Tournament;
 
 import java.io.File;
-import java.io.IOException;
 import java.sql.*;
 
 @RestController
@@ -51,7 +49,7 @@ public class PersonController {
                 objectMapper = new ObjectMapper();
                 //Alle Tournaments in json String schreiben
                 while (rstournaments.next()) {
-                    Tournament tournament = new Tournament(rstournaments.getInt("tournamentId"), rstournaments.getString("name"), rstournaments.getDate("start_time"), rstournaments.getDate("end_time"));
+                    Tournament tournament = new Tournament(rstournaments.getInt("tournamentId"), rstournaments.getString("name"), rstournaments.getTimestamp("start_time"), rstournaments.getTimestamp("end_time"));
                     jsonTournaments += objectMapper.writeValueAsString(tournament);
                 }
             } else {
@@ -61,7 +59,7 @@ public class PersonController {
                 objectMapper = new ObjectMapper();
                 //zugewiesene Tournaments in json String schreiben
                 while (rstournaments.next()) {
-                    Tournament tournament = new Tournament(rstournaments.getInt("tournamentId"), rstournaments.getString("name"), rstournaments.getDate("start_time"), rstournaments.getDate("end_time"));
+                    Tournament tournament = new Tournament(rstournaments.getInt("tournamentId"), rstournaments.getString("name"), rstournaments.getTimestamp("start_time"), rstournaments.getTimestamp("end_time"));
                     jsonTournaments += objectMapper.writeValueAsString(tournament);
                 }
             }
@@ -148,7 +146,7 @@ public class PersonController {
     }
 
     @GetMapping("/persons/person/addtournament/{personId}/{tournamentId}")
-    public String addTournament(@PathVariable int personId, @PathVariable int tournamentId) {
+    public String addPersontoTournament(@PathVariable int personId, @PathVariable int tournamentId) {
         File file = new File("DB/database");
         url = "jdbc:derby:" + file.getAbsolutePath();
 

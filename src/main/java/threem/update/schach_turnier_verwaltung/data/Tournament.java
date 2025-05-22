@@ -1,16 +1,17 @@
 package threem.update.schach_turnier_verwaltung.data;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 
 public class Tournament {
     private int tournamentId;
     private String name;
-    private Date start;
-    private Date end;
+    private Timestamp start;
+    private Timestamp end;
     private ArrayList<Person> players;
 
-    public Tournament(int tournamentId, String name, Date start, Date end) {
+    public Tournament(int tournamentId, String name, Timestamp start, Timestamp end) {
         this.tournamentId = tournamentId;
         this.name = name;
         this.start = start;
@@ -37,7 +38,7 @@ public class Tournament {
         return start;
     }
 
-    public void setStart(Date start) {
+    public void setStart(Timestamp start) {
         this.start = start;
     }
 
@@ -45,7 +46,7 @@ public class Tournament {
         return end;
     }
 
-    public void setEnd(Date end) {
+    public void setEnd(Timestamp end) {
         this.end = end;
     }
 }
