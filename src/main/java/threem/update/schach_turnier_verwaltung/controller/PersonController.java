@@ -8,13 +8,14 @@ import org.springframework.web.bind.annotation.RestController;
 import threem.update.schach_turnier_verwaltung.data.Person;
 import threem.update.schach_turnier_verwaltung.data.Tournament;
 
+import java.io.File;
 import java.io.IOException;
 import java.sql.*;
 
 @RestController
 public class PersonController {
 
-    private String url = "jdbc:derby:C:/Users/Samuel/Desktop/MGIN_PROJECTS/Schach_Turnier_Verwaltung/DB/database";
+    private String url;
     private String user = "DBAdmin";
     private String dbpassword = "DBAdmin";
 
@@ -23,6 +24,11 @@ public class PersonController {
     @GetMapping("/persons/person/{username}/{password}")
     public String getPerson(@PathVariable String username, @PathVariable String password) {
         try {
+            //Datenbank File finden
+            File file = new File("DB/database");
+            url = "jdbc:derby:"+file.getAbsolutePath();
+
+            //Datenbank verbinden und Person mit login credentials auslesen
             Connection con = DriverManager.getConnection(url,user,dbpassword);
             PreparedStatement pstmt = con.prepareStatement("select * from persons WHERE username = ? AND password =?");
             pstmt.setString(1,username);
@@ -30,12 +36,19 @@ public class PersonController {
             ResultSet rsPerson = pstmt.executeQuery();
             rsPerson.next();
             Person person = new Person(rsPerson.getInt("personId"),rsPerson.getString("username"),rsPerson.getString("password"),rsPerson.getBoolean("admin"),rsPerson.getInt("wins"),rsPerson.getInt("losses"),rsPerson.getInt("draws"));
+
+            //Person zu json String
+            ObjectMapper objectMapper = new ObjectMapper();
+            String jsonPerson = objectMapper.writeValueAsString(person);
+
             String jsonTournaments ="";
 
+            //wenn die Person Admin ist, werden alle Tournaments geladen, wenn nicht, dann werden die für den Spieler eingetragenen Tournaments geladen
             if(person.isAdmin()){
                 Statement stmt = con.createStatement();
                 ResultSet rstournaments = stmt.executeQuery("SELECT * FROM tournaments");
-                ObjectMapper objectMapper = new ObjectMapper();
+                objectMapper = new ObjectMapper();
+                //Alle Tournaments in json String schreiben
                 while(rstournaments.next()){
                     Tournament tournament = new Tournament(rstournaments.getInt("tournamentId"),rstournaments.getString("name"),rstournaments.getDate("start_time"),rstournaments.getDate("end_time"));
                     jsonTournaments += objectMapper.writeValueAsString(tournament);
@@ -44,7 +57,8 @@ public class PersonController {
                 PreparedStatement ptournstmt = con.prepareStatement("SELECT t.* fROM PERSONS_TOURNAMENTS pt JOIN TOURNAMENTS t ON pt.TOURNAMENTID = t.TOURNAMENTID WHERE pt.personID = ?");
                 ptournstmt.setInt(1,person.getId());
                 ResultSet rstournaments = ptournstmt.executeQuery();
-                ObjectMapper objectMapper = new ObjectMapper();
+                objectMapper = new ObjectMapper();
+                //zugewiesene Tournaments in json String schreiben
                 while(rstournaments.next()){
                     Tournament tournament = new Tournament(rstournaments.getInt("tournamentId"),rstournaments.getString("name"),rstournaments.getDate("start_time"),rstournaments.getDate("end_time"));
                     jsonTournaments += objectMapper.writeValueAsString(tournament);
@@ -53,9 +67,6 @@ public class PersonController {
 
             rsPerson.close();
             con.close();
-
-            ObjectMapper objectMapper = new ObjectMapper();
-            String jsonPerson = objectMapper.writeValueAsString(person);
 
             return jsonPerson+jsonTournaments;
 
