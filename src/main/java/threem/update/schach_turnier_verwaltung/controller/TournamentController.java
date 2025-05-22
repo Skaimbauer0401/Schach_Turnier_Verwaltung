@@ -5,13 +5,18 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import threem.update.schach_turnier_verwaltung.data.Tournament;
 
+import java.io.File;
+import java.sql.*;
 import java.util.Date;
-import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
 @RestController
 public class TournamentController {
+
+    private String url;
+    private String user = "DBAdmin";
+    private String dbpassword = "DBAdmin";
 
     @GetMapping("/tournaments/newtournament/{tournament_name}/{start_time}/{end_time}")
     public String newTournament(@PathVariable String tournament_name, @PathVariable String start_time, @PathVariable String end_time) throws ParseException {
@@ -25,8 +30,20 @@ public class TournamentController {
 
         Tournament tournament = new Tournament(1, "Tournament", start, end);
 
+        File file = new File("DB/database");
+        url = "jdbc:derby:" + file.getAbsolutePath();
 
-
-        return "Tournament erstellt";
+        try {
+            Connection con = DriverManager.getConnection(url, user, dbpassword);
+            PreparedStatement pstmt = con.prepareStatement("INSERT INTO tournaments (name, start_time, end_time) VALUES (?, ?, ?)");
+            pstmt.setString(1, tournament_name);
+            pstmt.setTimestamp(2, start);
+            pstmt.setTimestamp(3, end);
+            int i = pstmt.executeUpdate();
+            con.close();
+            return String.valueOf(i);
+        } catch (SQLException e) {
+            return "SQL Fehler";
+        }
     }
 }
