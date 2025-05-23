@@ -160,41 +160,19 @@
             errorMessage.style.display = 'none';
 
             // Make API call to get person data
-            let fetchString = `http://10.0.2.155:8080/persons/person/${username}/${password}`;
+            let fetchString = `http://localhost:8080/persons/person/${username}/${password}`;
             fetch(fetchString)
+
                 .then(response => {
-                    // Check if the response is JSON
-                    const contentType = response.headers.get('content-type');
-                    if (contentType && contentType.includes('application/json')) {
-                        // It's JSON, proceed normally
-                        if (!response.ok) {
-                            return response.json().then(errorData => {
-                                throw new Error(errorData.error || 'Failed to retrieve user data. Please check your credentials.');
-                            });
-                        }
-                        return response.json();
-                    } else {
-                        // Not JSON (probably HTML), handle the error
-                        throw new Error('Server returned an unexpected response. Please try again later.');
-                    }
-                })
-                .then(data => {
-                    // Debug: Log the response data
-                    console.log("Response data from server:", data);
+                    alert(response.ok)
+                    return response.json();
 
-                    // Store user data in sessionStorage
-                    sessionStorage.setItem('userData', JSON.stringify(data));
 
-                    // Redirect to dashboard
-                    window.location.href = 'dashboard.html';
-                })
+                }).then(data => {
+                alert(JSON.stringify(data)); // ✅ Jetzt hast du echtes JSON
+            })
                 .catch(error => {
-                    // Display error message
-                    errorMessage.textContent = error.message;
-                    errorMessage.style.display = 'block';
-
-                    // Hide the person card if it was previously shown
-                    document.getElementById('person-card').style.display = 'none';
+                    alert("Fehler: " + error.message);
                 });
         });
     </script>
