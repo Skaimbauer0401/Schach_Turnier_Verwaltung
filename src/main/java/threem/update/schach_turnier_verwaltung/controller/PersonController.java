@@ -2,7 +2,6 @@ package threem.update.schach_turnier_verwaltung.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.derby.shared.common.error.StandardException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -10,7 +9,6 @@ import threem.update.schach_turnier_verwaltung.data.Person;
 import threem.update.schach_turnier_verwaltung.data.Tournament;
 
 import java.io.File;
-import java.io.IOException;
 import java.sql.*;
 
 @RestController
@@ -51,7 +49,7 @@ public class PersonController {
                 objectMapper = new ObjectMapper();
                 //Alle Tournaments in json String schreiben
                 while (rstournaments.next()) {
-                    Tournament tournament = new Tournament(rstournaments.getInt("tournamentId"), rstournaments.getString("name"), rstournaments.getDate("start_time"), rstournaments.getDate("end_time"));
+                    Tournament tournament = new Tournament(rstournaments.getInt("tournamentId"), rstournaments.getString("name"), rstournaments.getTimestamp("start_time"), rstournaments.getTimestamp("end_time"));
                     jsonTournaments += objectMapper.writeValueAsString(tournament);
                 }
             } else {
@@ -61,7 +59,7 @@ public class PersonController {
                 objectMapper = new ObjectMapper();
                 //zugewiesene Tournaments in json String schreiben
                 while (rstournaments.next()) {
-                    Tournament tournament = new Tournament(rstournaments.getInt("tournamentId"), rstournaments.getString("name"), rstournaments.getDate("start_time"), rstournaments.getDate("end_time"));
+                    Tournament tournament = new Tournament(rstournaments.getInt("tournamentId"), rstournaments.getString("name"), rstournaments.getTimestamp("start_time"), rstournaments.getTimestamp("end_time"));
                     jsonTournaments += objectMapper.writeValueAsString(tournament);
                 }
             }
@@ -119,6 +117,52 @@ public class PersonController {
             return "SQL Fehler";
         }catch (Exception e){
             return "Unbekannter Fehler";
+        }
+    }
+
+    //gibt von allen Personen nur den username an den aufrufer
+    @GetMapping("/persons/allpersons")
+    public String getAllPersons() throws SQLException, JsonProcessingException {
+        File file = new File("DB/database");
+        url = "jdbc:derby:" + file.getAbsolutePath();
+
+        //Datenbank verbinden und Person hinzufügen, falls nicht bereits vorhanden
+        Connection con = DriverManager.getConnection(url, user, dbpassword);
+        Statement stmt = con.createStatement();
+        ResultSet rs = stmt.executeQuery("SELECT username FROM persons ORDER BY username ASC");
+
+        ObjectMapper objectMapper;
+        String jsonPerson = "";
+
+        while (rs.next()) {
+            Person person = new Person(1, rs.getString("username"), "x", false, 0, 0, 0);
+
+            objectMapper = new ObjectMapper();
+            jsonPerson += objectMapper.writeValueAsString(person);
+        }
+        con.close();
+
+        return jsonPerson;
+    }
+
+    @GetMapping("/persons/person/addtournament/{personId}/{tournamentId}")
+    public String addPersontoTournament(@PathVariable int personId, @PathVariable int tournamentId) {
+        File file = new File("DB/database");
+        url = "jdbc:derby:" + file.getAbsolutePath();
+
+        //Datenbank verbinden
+        try {
+            Connection con = DriverManager.getConnection(url, user, dbpassword);
+            PreparedStatement pstmt = con.prepareStatement("INSERT INTO persons_tournaments (personID, tournamentID) VALUES (?, ?)");
+            pstmt.setInt(1, personId);
+            pstmt.setInt(2, tournamentId);
+            int i = pstmt.executeUpdate();
+            con.close();
+
+            return String.valueOf(i);
+
+        } catch (SQLException e) {
+            return "SQL Fehler";
         }
     }
 }
