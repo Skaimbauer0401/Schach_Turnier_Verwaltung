@@ -160,7 +160,8 @@
             errorMessage.style.display = 'none';
 
             // Make API call to get person data
-            fetch(`/erson/${username}/${password}`)
+            let fetchString = `http://10.0.2.155:8080/persons/person/${username}/${password}`;
+            fetch(fetchString)
                 .then(response => {
                     // Check if the response is JSON
                     const contentType = response.headers.get('content-type');
