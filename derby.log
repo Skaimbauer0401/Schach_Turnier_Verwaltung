@@ -1,6 +1,6 @@
 ----------------------------------------------------------------
-Thu May 22 22:26:20 CEST 2025:
-Booting Derby version The Apache Software Foundation - Apache Derby - 10.17.1.0 - (1913217): instance a816c00e-0196-f9ac-e8b6-000007e43508 
+Fri May 23 11:53:48 CEST 2025:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.17.1.0 - (1913217): instance a816c00e-0196-fc90-2a65-000000a5ed48 
 on database directory C:\Users\Sebastian\Desktop\HTL\Schach_GIT\DB\database with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@5a07e868 
 Loaded from file:/C:/Users/Sebastian/.m2/repository/org/apache/derby/derby/10.17.1.0/derby-10.17.1.0.jar
 java.vendor=Oracle Corporation
