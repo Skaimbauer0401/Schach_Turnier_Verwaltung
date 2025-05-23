@@ -160,7 +160,7 @@
             errorMessage.style.display = 'none';
 
             // Make API call to get person data
-            fetch(`/persons/person/${username}/${password}`)
+            fetch(`/erson/${username}/${password}`)
                 .then(response => {
                     // Check if the response is JSON
                     const contentType = response.headers.get('content-type');
