@@ -53,6 +53,7 @@
             border-radius: 4px;
             cursor: pointer;
             font-size: 16px;
+            margin-right: 10px;
         }
         button:hover {
             background-color: #45a049;
@@ -116,7 +117,8 @@
                 <label for="password">Password:</label>
                 <input type="password" id="password" placeholder="Enter your password">
             </div>
-            <button id="login-btn">View Profile</button>
+            <button id="login-btn">Login</button>
+            <button id="register-btn">Register</button>
             <div id="error-message" class="error-message"></div>
         </div>
 
@@ -144,6 +146,11 @@
     </div>
 
     <script>
+        // Register button event listener
+        document.getElementById('register-btn').addEventListener('click', function() {
+            window.location.href = 'registration.html';
+        });
+
         document.getElementById('login-btn').addEventListener('click', function() {
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
