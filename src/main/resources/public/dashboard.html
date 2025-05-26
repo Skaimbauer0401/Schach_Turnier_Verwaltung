@@ -31,7 +31,7 @@
             background-color: #e9f7ef;
             border-radius: 5px;
         }
-        .person-card {
+        .person-card, .tournaments-card {
             margin-top: 20px;
             padding: 15px;
             background-color: #e9f7ef;
@@ -65,6 +65,32 @@
         .stat-label {
             font-size: 14px;
             color: #666;
+        }
+        .tournament-list {
+            margin-top: 15px;
+        }
+        .tournament-item {
+            background-color: #f1f1f1;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border-left: 3px solid #4CAF50;
+        }
+        .tournament-name {
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+        .tournament-dates {
+            color: #666;
+            font-size: 14px;
+        }
+        .no-tournaments {
+            text-align: center;
+            color: #666;
+            padding: 15px;
+            background-color: #f1f1f1;
+            border-radius: 5px;
         }
         .logout-btn {
             background-color: #f44336;
@@ -111,6 +137,16 @@
             </div>
         </div>
 
+        <div id="tournaments-card" class="tournaments-card">
+            <h2>Your Tournaments</h2>
+            <div id="tournament-list" class="tournament-list">
+                <!-- Tournament items will be added here dynamically -->
+                <div class="no-tournaments" id="no-tournaments">
+                    You are not participating in any tournaments yet.
+                </div>
+            </div>
+        </div>
+
         <button class="logout-btn" onclick="logout()">Logout</button>
     </div>
 
@@ -125,24 +161,82 @@
                 return;
             }
 
-            // Parse the user data
-            const user = JSON.parse(userData);
+            try {
+                // Parse the user data - it's an array with user as first element and tournaments as subsequent elements
+                const dataArray = JSON.parse(userData);
 
-            // Debug: Log the user data to the console
-            console.log("User data from sessionStorage:", user);
+                // Debug: Log the data to the console
+                console.log("Data from sessionStorage:", dataArray);
 
-            // Display the user data
-            document.getElementById('welcome-username').textContent = user.username;
-            // Try both field names for ID
-            document.getElementById('person-id').textContent = user.id || user.personId;
-            document.getElementById('person-username').textContent = user.username;
-            // Try both field names for admin status
-            document.getElementById('person-admin').textContent = (user.admin !== undefined) ? (user.admin ? 'Yes' : 'No') : 'Unknown';
-            // Try both field names for stats
-            document.getElementById('person-wins').textContent = user.wins || 0;
-            document.getElementById('person-losses').textContent = user.losses || 0;
-            document.getElementById('person-draws').textContent = user.draws || 0;
+                if (!Array.isArray(dataArray) || dataArray.length === 0) {
+                    console.error("Invalid data format in sessionStorage");
+                    return;
+                }
+
+                // First element is the user data
+                const user = dataArray[0];
+
+                // Display the user data
+                document.getElementById('welcome-username').textContent = user.username;
+                // Try both field names for ID
+                document.getElementById('person-id').textContent = user.id || user.personId;
+                document.getElementById('person-username').textContent = user.username;
+                // Try both field names for admin status
+                document.getElementById('person-admin').textContent = (user.admin !== undefined) ? (user.admin ? 'Yes' : 'No') : 'Unknown';
+                // Try both field names for stats
+                document.getElementById('person-wins').textContent = user.wins || 0;
+                document.getElementById('person-losses').textContent = user.losses || 0;
+                document.getElementById('person-draws').textContent = user.draws || 0;
+
+                // Process tournament data (elements after the first one)
+                const tournaments = dataArray.slice(1);
+                displayTournaments(tournaments);
+            } catch (error) {
+                console.error("Error processing user data:", error);
+            }
         };
+
+        // Function to display tournaments
+        function displayTournaments(tournaments) {
+            const tournamentList = document.getElementById('tournament-list');
+            const noTournamentsMessage = document.getElementById('no-tournaments');
+
+            // If there are no tournaments, show the message and return
+            if (!tournaments || tournaments.length === 0) {
+                noTournamentsMessage.style.display = 'block';
+                return;
+            }
+
+            // Hide the "no tournaments" message
+            noTournamentsMessage.style.display = 'none';
+
+            // Add each tournament to the list
+            tournaments.forEach(tournament => {
+                const tournamentItem = document.createElement('div');
+                tournamentItem.className = 'tournament-item';
+
+                const tournamentName = document.createElement('div');
+                tournamentName.className = 'tournament-name';
+                tournamentName.textContent = tournament.name;
+
+                const tournamentDates = document.createElement('div');
+                tournamentDates.className = 'tournament-dates';
+
+                // Format dates
+                const startDate = new Date(tournament.start);
+                const endDate = new Date(tournament.end);
+                const dateOptions = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+
+                tournamentDates.textContent = `From: ${startDate.toLocaleDateString(undefined, dateOptions)} - To: ${endDate.toLocaleDateString(undefined, dateOptions)}`;
+
+                // Add elements to the tournament item
+                tournamentItem.appendChild(tournamentName);
+                tournamentItem.appendChild(tournamentDates);
+
+                // Add the tournament item to the list
+                tournamentList.appendChild(tournamentItem);
+            });
+        }
 
         // Logout function
         function logout() {
