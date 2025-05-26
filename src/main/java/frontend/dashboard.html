@@ -192,14 +192,14 @@
                 const tournaments = dataArray.slice(1);
 
                 // Refresh data from server when page loads
-                refreshUserData();
+                refreshTournaments();
             } catch (error) {
                 console.error("Error processing user data:", error);
             }
         };
 
         // Function to refresh user data
-        function refreshUserData() {
+        function refreshTournaments() {
             const userData = sessionStorage.getItem('userData');
             if (!userData) return;
 
