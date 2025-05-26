@@ -115,6 +115,19 @@
         .form-group {
             margin-bottom: 15px;
         }
+        .form-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+        .form-row .form-group {
+            flex: 1;
+            margin-right: 10px;
+            margin-bottom: 0;
+        }
+        .form-row .form-group:last-child {
+            margin-right: 0;
+        }
         label {
             display: block;
             margin-bottom: 5px;
@@ -191,21 +204,25 @@
                 <label for="tournament-name">Tournament Name:</label>
                 <input type="text" id="tournament-name" placeholder="Enter tournament name">
             </div>
-            <div class="form-group">
-                <label for="start-date">Start Date:</label>
-                <input type="date" id="start-date">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="start-date">Start Date:</label>
+                    <input type="date" id="start-date">
+                </div>
+                <div class="form-group">
+                    <label for="start-time">Start Time:</label>
+                    <input type="time" id="start-time">
+                </div>
             </div>
-            <div class="form-group">
-                <label for="start-time">Start Time:</label>
-                <input type="time" id="start-time">
-            </div>
-            <div class="form-group">
-                <label for="end-date">End Date:</label>
-                <input type="date" id="end-date">
-            </div>
-            <div class="form-group">
-                <label for="end-time">End Time:</label>
-                <input type="time" id="end-time">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="end-date">End Date:</label>
+                    <input type="date" id="end-date">
+                </div>
+                <div class="form-group">
+                    <label for="end-time">End Time:</label>
+                    <input type="time" id="end-time">
+                </div>
             </div>
             <button class="create-btn" onclick="createTournament()">Create Tournament</button>
             <div id="success-message" class="success-message">Tournament created successfully!</div>
@@ -293,7 +310,12 @@
 
                 // Process tournament data (elements after the first one)
                 const tournaments = dataArray.slice(1);
-                displayTournaments(tournaments);
+
+                // Don't display tournaments from sessionStorage, we'll get them from the server
+                // displayTournaments(tournaments);
+
+                // Refresh data from server when page loads
+                refreshUserData();
             } catch (error) {
                 console.error("Error processing user data:", error);
             }
@@ -314,12 +336,14 @@
             noTournamentsMessage.style.display = 'none';
 
             // Clear existing tournament items
-            while (tournamentList.firstChild) {
-                if (tournamentList.firstChild === noTournamentsMessage) {
-                    break;
-                }
-                tournamentList.removeChild(tournamentList.firstChild);
-            }
+            // First, save the noTournamentsMessage element
+            tournamentList.removeChild(noTournamentsMessage);
+
+            // Clear all child elements
+            tournamentList.innerHTML = '';
+
+            // Add back the noTournamentsMessage element
+            tournamentList.appendChild(noTournamentsMessage);
 
             // Add each tournament to the list
             tournaments.forEach(tournament => {
