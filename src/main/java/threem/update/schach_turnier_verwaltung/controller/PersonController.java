@@ -50,7 +50,7 @@ public class PersonController {
                 //Alle Tournaments in json String schreiben
                 while (rstournaments.next()) {
                     Tournament tournament = new Tournament(rstournaments.getInt("tournamentId"), rstournaments.getString("name"), rstournaments.getTimestamp("start_time"), rstournaments.getTimestamp("end_time"));
-                    jsonTournaments += objectMapper.writeValueAsString(tournament);
+                    jsonTournaments += ","+objectMapper.writeValueAsString(tournament);
                 }
             } else {
                 PreparedStatement ptournstmt = con.prepareStatement("SELECT t.* fROM PERSONS_TOURNAMENTS pt JOIN TOURNAMENTS t ON pt.TOURNAMENTID = t.TOURNAMENTID WHERE pt.personID = ?");
@@ -60,14 +60,15 @@ public class PersonController {
                 //zugewiesene Tournaments in json String schreiben
                 while (rstournaments.next()) {
                     Tournament tournament = new Tournament(rstournaments.getInt("tournamentId"), rstournaments.getString("name"), rstournaments.getTimestamp("start_time"), rstournaments.getTimestamp("end_time"));
-                    jsonTournaments += objectMapper.writeValueAsString(tournament);
+                    jsonTournaments += ","+objectMapper.writeValueAsString(tournament);
                 }
             }
 
             rsPerson.close();
             con.close();
 
-            return jsonPerson + jsonTournaments;
+
+            return "["+jsonPerson + jsonTournaments+"]";
         } catch (SQLException e) {
             return "SQL Fehler";
         } catch (JsonProcessingException e) {

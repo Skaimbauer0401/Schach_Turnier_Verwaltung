@@ -159,11 +159,17 @@
             // Hide any previous error
             errorMessage.style.display = 'none';
 
+
+
+
+
+
             // Make API call to get person data
-            let fetchString = `http://localhost:8080/persons/person/${username}/${password}`;
-            fetch(fetchString)
+            let url= `http://localhost:8080/persons/person/${username}/${password}`;
+            fetch(url)
 
                 .then(response => {
+                    setTimeout(10000);
                     alert(response.ok)
                     return response.json();
 
