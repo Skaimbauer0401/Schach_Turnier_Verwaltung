@@ -13,12 +13,25 @@
             background-color: #f5f5f5;
         }
         .container {
-            max-width: 800px;
+            max-width: 1200px;
             margin: 0 auto;
             background-color: white;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .main-content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .left-column {
+            flex: 1;
+            min-width: 300px;
+        }
+        .right-column {
+            flex: 1;
+            min-width: 300px;
         }
         h1 {
             color: #333;
@@ -105,12 +118,19 @@
         .logout-btn:hover {
             background-color: #d32f2f;
         }
-        .create-tournament-form, .edit-tournament-form {
+        .create-tournament-form {
             margin-top: 20px;
             padding: 15px;
             background-color: #f0f8ff;
             border-radius: 5px;
             border-left: 5px solid #2196F3;
+        }
+        .edit-tournament-form {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #fffde7; /* Soft yellow tone */
+            border-radius: 5px;
+            border-left: 5px solid #FFC107;
         }
         .form-group {
             margin-bottom: 15px;
@@ -188,99 +208,109 @@
             Welcome, <span id="welcome-username">Admin</span>!
         </div>
 
-        <div id="person-card" class="person-card">
-            <h2>Your Profile</h2>
-            <div class="person-info">ID: <span id="person-id"></span></div>
-            <div class="person-info">Username: <span id="person-username"></span></div>
-            <div class="person-info">Admin Status: <span id="person-admin"></span></div>
+        <div class="main-content">
+            <div class="left-column">
+                <div id="person-card" class="person-card">
+                    <h2>Your Profile</h2>
+                    <div class="person-info">ID: <span id="person-id"></span></div>
+                    <div class="person-info">Username: <span id="person-username"></span></div>
+                    <div class="person-info">Admin Status: <span id="person-admin"></span></div>
 
-            <div class="stats-container">
-                <div class="stat-box">
-                    <div class="stat-value" id="person-wins">0</div>
-                    <div class="stat-label">Wins</div>
+                    <div class="stats-container">
+                        <div class="stat-box">
+                            <div class="stat-value" id="person-wins">0</div>
+                            <div class="stat-label">Wins</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-value" id="person-losses">0</div>
+                            <div class="stat-label">Losses</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-value" id="person-draws">0</div>
+                            <div class="stat-label">Draws</div>
+                        </div>
+                    </div>
                 </div>
-                <div class="stat-box">
-                    <div class="stat-value" id="person-losses">0</div>
-                    <div class="stat-label">Losses</div>
+
+                <div class="create-tournament-form">
+                    <h2>Create New Tournament</h2>
+                    <div class="form-group">
+                        <label for="tournament-name">Tournament Name:</label>
+                        <input type="text" id="tournament-name" placeholder="Enter tournament name">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="start-date">Start Date:</label>
+                            <input type="date" id="start-date">
+                        </div>
+                        <div class="form-group">
+                            <label for="start-time">Start Time:</label>
+                            <input type="time" id="start-time">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="end-date">End Date:</label>
+                            <input type="date" id="end-date">
+                        </div>
+                        <div class="form-group">
+                            <label for="end-time">End Time:</label>
+                            <input type="time" id="end-time">
+                        </div>
+                    </div>
+                    <button class="create-btn" onclick="createTournament()">Create Tournament</button>
+                    <div id="success-message" class="success-message">Tournament created successfully!</div>
+                    <div id="error-message" class="error-message">Error creating tournament. Please try again.</div>
                 </div>
-                <div class="stat-box">
-                    <div class="stat-value" id="person-draws">0</div>
-                    <div class="stat-label">Draws</div>
+
+                <div class="edit-tournament-form" id="edit-tournament-form" style="display: none;">
+                    <h2>Edit Tournament</h2>
+                    <div class="form-group">
+                        <label for="edit-tournament-name">Tournament Name:</label>
+                        <input type="text" id="edit-tournament-name" placeholder="Enter tournament name">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="edit-start-date">Start Date:</label>
+                            <input type="date" id="edit-start-date">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-start-time">Start Time:</label>
+                            <input type="time" id="edit-start-time">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="edit-end-date">End Date:</label>
+                            <input type="date" id="edit-end-date">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-end-time">End Time:</label>
+                            <input type="time" id="edit-end-time">
+                        </div>
+                    </div>
+                    <input type="hidden" id="edit-tournament-id">
+                    <button class="create-btn" onclick="updateTournament()">Update Tournament</button>
+                    <button class="logout-btn" onclick="cancelEdit()" style="background-color: #808080;">Cancel</button>
+                    <div id="edit-success-message" class="success-message">Tournament updated successfully!</div>
+                    <div id="edit-error-message" class="error-message">Error updating tournament. Please try again.</div>
+                </div>
+
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+
+            <div class="right-column">
+                <div id="tournaments-card" class="tournaments-card">
+                    <h2>All Tournaments</h2>
+                    <div id="tournament-list" class="tournament-list">
+                        <!-- Tournament items will be added here dynamically -->
+                        <div class="no-tournaments" id="no-tournaments">
+                            There are no tournaments yet.
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-
-        <div class="create-tournament-form">
-            <h2>Create New Tournament</h2>
-            <div class="form-group">
-                <label for="tournament-name">Tournament Name:</label>
-                <input type="text" id="tournament-name" placeholder="Enter tournament name">
-            </div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="start-date">Start Date:</label>
-                    <input type="date" id="start-date">
-                </div>
-                <div class="form-group">
-                    <label for="start-time">Start Time:</label>
-                    <input type="time" id="start-time">
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="end-date">End Date:</label>
-                    <input type="date" id="end-date">
-                </div>
-                <div class="form-group">
-                    <label for="end-time">End Time:</label>
-                    <input type="time" id="end-time">
-                </div>
-            </div>
-            <button class="create-btn" onclick="createTournament()">Create Tournament</button>
-            <div id="success-message" class="success-message">Tournament created successfully!</div>
-            <div id="error-message" class="error-message">Error creating tournament. Please try again.</div>
-        </div>
-
-        <div class="edit-tournament-form" id="edit-tournament-form" style="display: none;">
-            <h2>Edit Tournament</h2>
-            <div class="form-group">
-                <label for="edit-tournament-name">Tournament Name:</label>
-                <input type="text" id="edit-tournament-name" placeholder="Enter tournament name">
-            </div>
-            <div class="form-group">
-                <label for="edit-start-date">Start Date:</label>
-                <input type="date" id="edit-start-date">
-            </div>
-            <div class="form-group">
-                <label for="edit-start-time">Start Time:</label>
-                <input type="time" id="edit-start-time">
-            </div>
-            <div class="form-group">
-                <label for="edit-end-date">End Date:</label>
-                <input type="date" id="edit-end-date">
-            </div>
-            <div class="form-group">
-                <label for="edit-end-time">End Time:</label>
-                <input type="time" id="edit-end-time">
-            </div>
-            <input type="hidden" id="edit-tournament-id">
-            <button class="create-btn" onclick="updateTournament()">Update Tournament</button>
-            <button class="logout-btn" onclick="cancelEdit()" style="background-color: #808080;">Cancel</button>
-            <div id="edit-success-message" class="success-message">Tournament updated successfully!</div>
-            <div id="edit-error-message" class="error-message">Error updating tournament. Please try again.</div>
-        </div>
-
-        <div id="tournaments-card" class="tournaments-card">
-            <h2>All Tournaments</h2>
-            <div id="tournament-list" class="tournament-list">
-                <!-- Tournament items will be added here dynamically -->
-                <div class="no-tournaments" id="no-tournaments">
-                    There are no tournaments yet.
-                </div>
-            </div>
-        </div>
-
-        <button class="logout-btn" onclick="logout()">Logout</button>
     </div>
 
     <script>
