@@ -1,9 +1,9 @@
-package threem.update.schach_turnier_verwaltung.controller;
+package threem.update.schach_turnier_verwaltung.backend.controller;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
-import threem.update.schach_turnier_verwaltung.data.Tournament;
+import threem.update.schach_turnier_verwaltung.backend.Tournament;
 
 import java.io.File;
 import java.sql.*;

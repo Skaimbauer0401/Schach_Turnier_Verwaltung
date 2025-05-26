@@ -1,4 +1,4 @@
-package threem.update.schach_turnier_verwaltung;
+package threem.update.schach_turnier_verwaltung.backend;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
