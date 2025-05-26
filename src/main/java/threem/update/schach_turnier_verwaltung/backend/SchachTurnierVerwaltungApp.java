@@ -1,4 +1,4 @@
-package threem.update.schach_turnier_verwaltung;
+package threem.update.schach_turnier_verwaltung.backend;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -7,10 +7,10 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @SpringBootApplication
-public class SchachTurnierVerwaltungApplication {
+public class SchachTurnierVerwaltungApp {
 
     public static void main(String[] args) {
-        SpringApplication.run(SchachTurnierVerwaltungApplication.class, args);
+        SpringApplication.run(SchachTurnierVerwaltungApp.class, args);
     }
 
     @Bean

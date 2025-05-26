@@ -1,4 +1,4 @@
-package threem.update.schach_turnier_verwaltung.data;
+package threem.update.schach_turnier_verwaltung.backend.data;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
