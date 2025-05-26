@@ -183,9 +183,23 @@
                     if (!response.ok) {
                         throw new Error(`Server responded with status: ${response.status}`);
                     }
-                    return response.json();
+                    return response.text();
+                })
+                .then(text => {
+                    if(text === "Benutzername oder Passwort falsch") {
+                        errorMessage.textContent = text;
+                        errorMessage.style.display = 'block';
+                        return null;
+                    } else {
+                        return JSON.parse(text);
+                    }
                 })
                 .then(data => {
+                    // If data is null (login failed), don't proceed
+                    if (data === null) {
+                        return;
+                    }
+
                     // Hide loading message
                     errorMessage.style.display = 'none';
 
@@ -195,8 +209,12 @@
                     // Store user data in sessionStorage
                     sessionStorage.setItem('userData', JSON.stringify(data));
 
-                    // Redirect to dashboard
-                    window.location.href = 'dashboard.html';
+                    // Check if user is admin and redirect accordingly
+                    if (data[0].admin) {
+                        window.location.href = 'dashboard_admin.html';
+                    } else {
+                        window.location.href = 'dashboard.html';
+                    }
                 })
                 .catch(error => {
                     // Display error message

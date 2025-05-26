@@ -26,15 +26,18 @@ public class PersonController {
             //Datenbank File finden
             File file = new File("DB/database");
             url = "jdbc:derby:" + file.getAbsolutePath();
-
             //Datenbank verbinden und Person mit login credentials auslesen
             Connection con = DriverManager.getConnection(url, user, dbpassword);
             PreparedStatement pstmt = con.prepareStatement("select * from persons WHERE username = ? AND password =?");
             pstmt.setString(1, username);
             pstmt.setString(2, password);
             ResultSet rsPerson = pstmt.executeQuery();
-            rsPerson.next();
-            Person person = new Person(rsPerson.getInt("personId"), rsPerson.getString("username"), rsPerson.getString("password"), rsPerson.getBoolean("admin"), rsPerson.getInt("wins"), rsPerson.getInt("losses"), rsPerson.getInt("draws"));
+            Person person;
+            if(rsPerson.next()){
+                person = new Person(rsPerson.getInt("personId"), rsPerson.getString("username"), rsPerson.getString("password"), rsPerson.getBoolean("admin"), rsPerson.getInt("wins"), rsPerson.getInt("losses"), rsPerson.getInt("draws"));
+            }else{
+                return "Benutzername oder Passwort falsch";
+            }
 
             //Person zu json String
             ObjectMapper objectMapper = new ObjectMapper();
