@@ -160,7 +160,6 @@
             errorMessage.style.display = 'none';
 
             // Make API call to get person data
-            let fetchString = `http://localhost:8080/persons/person/${username}/${password}`;
 
             // Show loading message
             errorMessage.textContent = 'Loading data, please wait...';
@@ -169,6 +168,8 @@
             // Disable the button to prevent multiple requests
             const loginBtn = document.getElementById('login-btn');
             loginBtn.disabled = true;
+
+            let fetchString = `http://localhost:8080/persons/person/${username}/${password}`;
 
             fetch(fetchString)
                 .then(response => {
