@@ -46,4 +46,26 @@ public class TournamentController {
             return "SQL Fehler";
         }
     }
+    @GetMapping("/tournaments/tournament/alter/{tournamentId}/{name}/{start_time}/{end_time}")
+    public String alterTournament(@PathVariable int tournamentId, @PathVariable String name, @PathVariable long start_time, @PathVariable long end_time) {
+        File file = new File("DB/database");
+        url = "jdbc:derby:" + file.getAbsolutePath();
+        try {
+            Connection con = DriverManager.getConnection(url, user, dbpassword);
+            PreparedStatement pstmt = con.prepareStatement("UPDATE tournaments SET name = ?, start_time = ?, end_time = ? WHERE tournamentId = ?");
+            pstmt.setString(1, name);
+            pstmt.setTimestamp(2, new Timestamp(start_time));
+            pstmt.setTimestamp(3, new Timestamp(end_time));
+            pstmt.setInt(4, tournamentId);
+            int i = pstmt.executeUpdate();
+            con.close();
+
+            return String.valueOf(i);
+        } catch (SQLException e) {
+            return "SQL Fehler: " + e.getMessage();
+        } catch (Exception e) {
+            return "Unbekannter Fehler: " + e.getMessage();
+        }
+    }
 }
+
