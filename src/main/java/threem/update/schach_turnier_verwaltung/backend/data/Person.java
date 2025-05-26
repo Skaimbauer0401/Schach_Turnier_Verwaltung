@@ -1,7 +1,5 @@
 package threem.update.schach_turnier_verwaltung.backend.data;
 
-import threem.update.schach_turnier_verwaltung.backend.Tournament;
-
 import java.util.ArrayList;
 
 public class Person {
