@@ -184,14 +184,11 @@
                     // Process the data
                     console.log("Data received:", data);
 
-                    // Display the data in the UI
-                    document.getElementById('person-card').style.display = 'block';
-                    document.getElementById('person-id').textContent = data.id;
-                    document.getElementById('person-username').textContent = data.username;
-                    document.getElementById('person-admin').textContent = data.admin ? 'Administrator' : 'Player';
-                    document.getElementById('person-wins').textContent = data.wins;
-                    document.getElementById('person-losses').textContent = data.losses;
-                    document.getElementById('person-draws').textContent = data.draws;
+                    // Store user data in sessionStorage
+                    sessionStorage.setItem('userData', JSON.stringify(data));
+
+                    // Redirect to dashboard
+                    window.location.href = 'dashboard.html';
                 })
                 .catch(error => {
                     // Display error message
