@@ -38,6 +38,52 @@
             border-radius: 5px;
             border-left: 5px solid #4CAF50;
         }
+        .profile-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .profile-picture-container {
+            position: relative;
+            width: 80px;
+            height: 80px;
+        }
+        .profile-picture {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #4CAF50;
+            cursor: pointer;
+        }
+        .profile-picture-options {
+            display: none;
+            position: absolute;
+            top: 85px;
+            right: 0;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 10;
+            padding: 10px;
+        }
+        .profile-picture-options.show {
+            display: block;
+        }
+        .picture-option {
+            width: 60px;
+            height: 60px;
+            margin: 5px;
+            border-radius: 50%;
+            object-fit: cover;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        .picture-option:hover {
+            border-color: #4CAF50;
+        }
         .person-info {
             margin-bottom: 10px;
         }
@@ -116,7 +162,16 @@
         </div>
 
         <div id="person-card" class="person-card">
-            <h2>Your Profile</h2>
+            <div class="profile-header">
+                <h2>Your Profile</h2>
+                <div class="profile-picture-container">
+                    <img id="profile-picture" class="profile-picture" src="../../7124ec8400d0f4dc80de34664dedfade.jpg" alt="Profile Picture" onclick="togglePictureOptions()">
+                    <div id="profile-picture-options" class="profile-picture-options">
+                        <img class="picture-option" src="../../7124ec8400d0f4dc80de34664dedfade.jpg" alt="Profile Picture 1" onclick="selectProfilePicture('../../7124ec8400d0f4dc80de34664dedfade.jpg')">
+                        <img class="picture-option" src="../../artworks-tUxq1OnxuZnvJ7kX-1ucl1w-t500x500.jpg" alt="Profile Picture 2" onclick="selectProfilePicture('../../artworks-tUxq1OnxuZnvJ7kX-1ucl1w-t500x500.jpg')">
+                    </div>
+                </div>
+            </div>
             <div class="person-info">ID: <span id="person-id"></span></div>
             <div class="person-info">Username: <span id="person-username"></span></div>
             <div class="person-info">Admin Status: <span id="person-admin"></span></div>
@@ -150,13 +205,52 @@
     </div>
 
     <script>
+        // Function to toggle profile picture options dropdown
+        function togglePictureOptions() {
+            const options = document.getElementById('profile-picture-options');
+            options.classList.toggle('show');
+        }
+
+        // Function to select a profile picture
+        function selectProfilePicture(picturePath) {
+            // Update the profile picture
+            const profilePicture = document.getElementById('profile-picture');
+            profilePicture.src = picturePath;
+
+            // Hide the options dropdown
+            const options = document.getElementById('profile-picture-options');
+            options.classList.remove('show');
+
+            // Save the selection to localStorage
+            localStorage.setItem('profilePicture', picturePath);
+        }
+
+        // Close the dropdown if the user clicks outside of it
+        window.onclick = function(event) {
+            if (!event.target.matches('.profile-picture')) {
+                const dropdowns = document.getElementsByClassName('profile-picture-options');
+                for (let i = 0; i < dropdowns.length; i++) {
+                    const openDropdown = dropdowns[i];
+                    if (openDropdown.classList.contains('show')) {
+                        openDropdown.classList.remove('show');
+                    }
+                }
+            }
+        }
+
         // Check if user data exists in sessionStorage
         window.onload = function() {
+            // Load saved profile picture if exists
+            const savedPicture = localStorage.getItem('profilePicture');
+            if (savedPicture) {
+                document.getElementById('profile-picture').src = savedPicture;
+            }
+
             const userData = sessionStorage.getItem('userData');
 
             if (!userData) {
                 // No user data found, redirect back to login
-                window.location.href = 'person-viewer.html';
+                window.location.href = 'login.html';
                 return;
             }
 
