@@ -67,5 +67,30 @@ public class TournamentController {
             return "Unbekannter Fehler: " + e.getMessage();
         }
     }
-}
 
+    @GetMapping("/tournaments/tournament/delete/{tournamentId}")
+    public String deleteTournament(@PathVariable int tournamentId) {
+        File file = new File("DB/database");
+        url = "jdbc:derby:" + file.getAbsolutePath();
+        try {
+            Connection con = DriverManager.getConnection(url, user, dbpassword);
+
+            // First delete any references in the persons_tournaments table
+            PreparedStatement pstmtRefs = con.prepareStatement("DELETE FROM persons_tournaments WHERE tournamentId = ?");
+            pstmtRefs.setInt(1, tournamentId);
+            pstmtRefs.executeUpdate();
+
+            // Then delete the tournament
+            PreparedStatement pstmt = con.prepareStatement("DELETE FROM tournaments WHERE tournamentId = ?");
+            pstmt.setInt(1, tournamentId);
+            int i = pstmt.executeUpdate();
+            con.close();
+
+            return String.valueOf(i);
+        } catch (SQLException e) {
+            return "SQL Fehler: " + e.getMessage();
+        } catch (Exception e) {
+            return "Unbekannter Fehler: " + e.getMessage();
+        }
+    }
+}

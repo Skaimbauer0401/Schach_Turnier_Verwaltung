@@ -149,7 +149,7 @@ public class PersonController {
         return jsonPerson;
     }
 
-    @GetMapping("/persons/person/addtournament/{personId}/{tournamentId}")
+    @GetMapping("/persons/person/addpersontotournament/{personId}/{tournamentId}")
     public String addPersontoTournament(@PathVariable int personId, @PathVariable int tournamentId) {
         File file = new File("DB/database");
         url = "jdbc:derby:" + file.getAbsolutePath();
