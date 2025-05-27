@@ -190,7 +190,11 @@
                         errorMessage.textContent = text;
                         errorMessage.style.display = 'block';
                         return null;
-                    } else {
+                    } else if(text === "SQL Fehler") {
+                        errorMessage.textContent = text;
+                        errorMessage.style.display = 'block';
+                        return null
+                    }else{
                         return JSON.parse(text);
                     }
                 })
