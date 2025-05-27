@@ -33,9 +33,9 @@ public class PersonController {
             pstmt.setString(2, password);
             ResultSet rsPerson = pstmt.executeQuery();
             Person person;
-            if(rsPerson.next()){
+            if (rsPerson.next()) {
                 person = new Person(rsPerson.getInt("personId"), rsPerson.getString("username"), rsPerson.getString("password"), rsPerson.getBoolean("admin"), rsPerson.getInt("wins"), rsPerson.getInt("losses"), rsPerson.getInt("draws"));
-            }else{
+            } else {
                 return "Benutzername oder Passwort falsch";
             }
 
@@ -53,7 +53,7 @@ public class PersonController {
                 //Alle Tournaments in json String schreiben
                 while (rstournaments.next()) {
                     Tournament tournament = new Tournament(rstournaments.getInt("tournamentId"), rstournaments.getString("name"), rstournaments.getTimestamp("start_time"), rstournaments.getTimestamp("end_time"));
-                    jsonTournaments += ","+objectMapper.writeValueAsString(tournament);
+                    jsonTournaments += "," + objectMapper.writeValueAsString(tournament);
                 }
             } else {
                 PreparedStatement ptournstmt = con.prepareStatement("SELECT DISTINCT t.* FROM PERSONS_TOURNAMENTS pt JOIN TOURNAMENTS t ON pt.TOURNAMENTID = t.TOURNAMENTID WHERE pt.personID = ?");
@@ -63,7 +63,7 @@ public class PersonController {
                 //zugewiesene Tournaments in json String schreiben
                 while (rstournaments.next()) {
                     Tournament tournament = new Tournament(rstournaments.getInt("tournamentId"), rstournaments.getString("name"), rstournaments.getTimestamp("start_time"), rstournaments.getTimestamp("end_time"));
-                    jsonTournaments += ","+objectMapper.writeValueAsString(tournament);
+                    jsonTournaments += "," + objectMapper.writeValueAsString(tournament);
                 }
             }
 
@@ -71,7 +71,7 @@ public class PersonController {
             con.close();
 
 
-            return "["+jsonPerson + jsonTournaments+"]";
+            return "[" + jsonPerson + jsonTournaments + "]";
         } catch (SQLException e) {
             return "SQL Fehler";
         } catch (JsonProcessingException e) {
@@ -101,7 +101,7 @@ public class PersonController {
             personstmt.setString(1, person.getUsername());
             ResultSet rs = personstmt.executeQuery();
             rs.next();
-            if(rs.getInt(1)>=1){
+            if (rs.getInt(1) >= 1) {
                 return "Benutzername bereits vergeben";
             }
 
@@ -117,9 +117,9 @@ public class PersonController {
             con.close();
 
             return String.valueOf(result);
-        }catch (SQLException e) {
+        } catch (SQLException e) {
             return "SQL Fehler";
-        }catch (Exception e){
+        } catch (Exception e) {
             return "Unbekannter Fehler";
         }
     }

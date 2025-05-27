@@ -46,6 +46,7 @@ public class TournamentController {
             return "SQL Fehler";
         }
     }
+
     @GetMapping("/tournaments/tournament/alter/{tournamentId}/{name}/{start_time}/{end_time}")
     public String alterTournament(@PathVariable int tournamentId, @PathVariable String name, @PathVariable long start_time, @PathVariable long end_time) {
         File file = new File("DB/database");
