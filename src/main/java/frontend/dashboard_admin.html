@@ -778,6 +778,21 @@
 
         // Function to delete a tournament
         function deleteTournament(tournamentId) {
+            // Immediately remove the tournament from the UI
+            const tournamentItems = document.querySelectorAll('.tournament-item');
+            tournamentItems.forEach(item => {
+                // Check if this item contains the tournament ID we're deleting
+                if (item.querySelector('.tournament-name').textContent.includes(`ID: ${tournamentId}`)) {
+                    item.remove();
+                }
+            });
+
+            // Check if there are no tournaments left and show the "no tournaments" message if needed
+            const remainingTournaments = document.querySelectorAll('.tournament-item');
+            if (remainingTournaments.length === 0) {
+                document.getElementById('no-tournaments').style.display = 'block';
+            }
+
             // Make API call to delete tournament
             fetch(`http://localhost:8080/tournaments/tournament/delete/${tournamentId}`)
                 .then(response => {
