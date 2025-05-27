@@ -146,6 +146,15 @@
                     You are not participating in any tournaments yet.
                 </div>
             </div>
+
+            <div style="margin-top: 20px; padding: 15px; background-color: #f1f1f1; border-radius: 5px;">
+                <h3>Join Tournament</h3>
+                <div style="display: flex; margin-bottom: 10px;">
+                    <input type="number" id="tournament-id" placeholder="Enter Tournament ID" style="flex: 1; padding: 8px; margin-right: 10px; border-radius: 4px; border: 1px solid #ccc;">
+                    <button onclick="addToTournament()" style="background-color: #4CAF50; color: white; padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer;">Join</button>
+                </div>
+                <div id="tournament-message" style="margin-top: 10px; padding: 8px; border-radius: 4px; display: none;"></div>
+            </div>
         </div>
     </div>
 
@@ -254,6 +263,16 @@
             // Hide the "no tournaments" message
             noTournamentsMessage.style.display = 'none';
 
+            // Clear existing tournament items
+            // First, save the noTournamentsMessage element
+            tournamentList.removeChild(noTournamentsMessage);
+
+            // Clear all child elements
+            tournamentList.innerHTML = '';
+
+            // Add back the noTournamentsMessage element
+            tournamentList.appendChild(noTournamentsMessage);
+
             // Add each tournament to the list
             tournaments.forEach(tournament => {
                 const tournamentItem = document.createElement('div');
@@ -280,6 +299,65 @@
                 // Add the tournament item to the list
                 tournamentList.appendChild(tournamentItem);
             });
+        }
+
+        // Function to add person to tournament
+        function addToTournament() {
+            const tournamentId = document.getElementById('tournament-id').value;
+            const messageDiv = document.getElementById('tournament-message');
+
+            // Validate input
+            if (!tournamentId || isNaN(tournamentId) || tournamentId <= 0) {
+                messageDiv.textContent = 'Please enter a valid tournament ID';
+                messageDiv.style.display = 'block';
+                messageDiv.style.backgroundColor = '#ffcccc';
+                return;
+            }
+
+            // Get person ID from session storage
+            const userData = sessionStorage.getItem('userData');
+            if (!userData) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const dataArray = JSON.parse(userData);
+            const user = dataArray[0];
+            const personId = user.id || user.personId;
+
+            // Call API to add person to tournament
+            fetch(`http://localhost:8080/persons/person/addpersontotournament/${personId}/${tournamentId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Server responded with status: ${response.status}`);
+                    }
+                    return response.text();
+                })
+                .then(result => {
+                    if (result === "Tournament existiert nicht") {
+                        messageDiv.textContent = 'This tournament does not exist';
+                        messageDiv.style.backgroundColor = '#ffcccc';
+                    } else if (result === "SQL Fehler") {
+                        messageDiv.textContent = 'Error: You might already be registered for this tournament';
+                        messageDiv.style.backgroundColor = '#ffcccc';
+                    } else {
+                        messageDiv.textContent = 'Successfully joined the tournament';
+                        messageDiv.style.backgroundColor = '#ccffcc';
+
+                        // Clear the input field
+                        document.getElementById('tournament-id').value = '';
+
+                        // Refresh tournaments list
+                        refreshTournaments();
+                    }
+                    messageDiv.style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    messageDiv.textContent = 'An error occurred. Please try again.';
+                    messageDiv.style.display = 'block';
+                    messageDiv.style.backgroundColor = '#ffcccc';
+                });
         }
 
         // Logout function

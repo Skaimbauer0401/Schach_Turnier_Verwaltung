@@ -56,7 +56,7 @@ public class PersonController {
                     jsonTournaments += ","+objectMapper.writeValueAsString(tournament);
                 }
             } else {
-                PreparedStatement ptournstmt = con.prepareStatement("SELECT t.* fROM PERSONS_TOURNAMENTS pt JOIN TOURNAMENTS t ON pt.TOURNAMENTID = t.TOURNAMENTID WHERE pt.personID = ?");
+                PreparedStatement ptournstmt = con.prepareStatement("SELECT DISTINCT t.* FROM PERSONS_TOURNAMENTS pt JOIN TOURNAMENTS t ON pt.TOURNAMENTID = t.TOURNAMENTID WHERE pt.personID = ?");
                 ptournstmt.setInt(1, person.getId());
                 ResultSet rstournaments = ptournstmt.executeQuery();
                 objectMapper = new ObjectMapper();
@@ -157,6 +157,19 @@ public class PersonController {
         //Datenbank verbinden
         try {
             Connection con = DriverManager.getConnection(url, user, dbpassword);
+
+            // First check if the tournament exists
+            PreparedStatement checkTournament = con.prepareStatement("SELECT COUNT(*) FROM tournaments WHERE tournamentId = ?");
+            checkTournament.setInt(1, tournamentId);
+            ResultSet rs = checkTournament.executeQuery();
+            rs.next();
+            int count = rs.getInt(1);
+
+            if (count == 0) {
+                con.close();
+                return "Tournament existiert nicht";
+            }
+
             PreparedStatement pstmt = con.prepareStatement("INSERT INTO persons_tournaments (personID, tournamentID) VALUES (?, ?)");
             pstmt.setInt(1, personId);
             pstmt.setInt(2, tournamentId);
