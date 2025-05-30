@@ -182,7 +182,8 @@
 
         <div class="button-container" style="margin-top: 20px; margin-bottom: 20px; display: flex; justify-content: center; gap: 10px;">
             <button onclick="goBack()" style="background-color: #2196F3;">Back to Previous Page</button>
-            <button onclick="resetMatrix()">Reset Matrix</button>
+            <button onclick="resetMatrix()" style="background-color: #FF9800;">Reset Matrix</button>
+            <button onclick="saveMatches()">Save Matches</button>
         </div>
     </div>
 
@@ -358,6 +359,74 @@
             window.history.back();
         }
 
+        // Function to save match results to the database
+        function saveMatches() {
+            const tournamentId = getUrlParameter('tournamentId');
+            if (!tournamentId) {
+                alert('No tournament ID found. Cannot save matches.');
+                return;
+            }
+
+            // Check if there are any match results to save
+            if (Object.keys(matchResults).length === 0) {
+                alert('No match results to save.');
+                return;
+            }
+
+            // Convert matchResults to a format suitable for the backend
+            // We need to map player names to player IDs
+            const matchData = {};
+
+            // Get player IDs from the URL or fetch them from the server
+            fetch(`http://localhost:8080/persons/person/getPersonByTournament/${tournamentId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Create a map of player names to IDs
+                    const playerMap = {};
+                    data.forEach(person => {
+                        playerMap[person.username] = person.personId;
+                    });
+
+                    // Convert match results using player IDs
+                    for (const [key, result] of Object.entries(matchResults)) {
+                        const [player1Name, player2Name] = key.split('-');
+                        const player1Id = playerMap[player1Name];
+                        const player2Id = playerMap[player2Name];
+
+                        if (player1Id && player2Id) {
+                            matchData[`${player1Id}-${player2Id}`] = result;
+                        }
+                    }
+
+                    // Send the data to the server
+                    return fetch(`http://localhost:8080/tournaments/addMatches/${tournamentId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(matchData)
+                    });
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.text();
+                })
+                .then(data => {
+                    alert('Matches saved successfully: ' + data);
+                })
+                .catch(error => {
+                    console.error('Error saving matches:', error);
+                    alert('Failed to save matches: ' + error.message);
+                });
+        }
+
         // Fetch players from the tournament API
         function fetchPlayersFromTournament(tournamentId) {
             if (!tournamentId) {
@@ -398,12 +467,59 @@
                         players.push(person.username);
                     });
 
+                    // Create a map of player IDs to names for later use
+                    const playerIdToName = {};
+                    data.forEach(person => {
+                        playerIdToName[person.personId] = person.username;
+                    });
+
                     // Update the matrix with the new players
                     updateMatrix();
+
+                    // Fetch match results for this tournament
+                    fetchMatchResults(tournamentId, playerIdToName);
                 })
                 .catch(error => {
                     console.error('Error fetching players:', error);
                     alert('Failed to load players from tournament: ' + error.message);
+                });
+        }
+
+        // Fetch match results from the tournament API
+        function fetchMatchResults(tournamentId, playerIdToName) {
+            fetch(`http://localhost:8080/tournaments/getMatches/${tournamentId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Clear existing match results
+                    matchResults = {};
+
+                    // Process each match result
+                    for (const [key, result] of Object.entries(data)) {
+                        // Parse the key to get player IDs (format: "player1Id-player2Id")
+                        const [player1Id, player2Id] = key.split('-');
+
+                        // Convert player IDs to names
+                        const player1Name = playerIdToName[player1Id];
+                        const player2Name = playerIdToName[player2Id];
+
+                        if (player1Name && player2Name) {
+                            // Store the match result with player names as the key
+                            matchResults[`${player1Name}-${player2Name}`] = result;
+                        }
+                    }
+
+                    // Update the matrix with the match results
+                    updateMatrix();
+                })
+                .catch(error => {
+                    console.error('Error fetching match results:', error);
+                    // Don't show an alert for this error, as it's not critical
+                    console.log('Failed to load match results. The matrix will be empty.');
                 });
         }
 
