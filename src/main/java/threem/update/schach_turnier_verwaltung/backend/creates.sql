@@ -21,5 +21,8 @@ SELECT t.*
 SELECT * FROM persons;
 SELECT * FROM tournaments;
 SELECT * FROM persons_tournaments;
+SELECT p.personId, p.username
+    FROM persons_tournaments pt JOIN persons p on pt.personId = p.personId
+    WHERE pt.tournamentId = 1;
 
 SELECT COUNT(personId) FROM persons WHERE username = 'Skaimbauer';

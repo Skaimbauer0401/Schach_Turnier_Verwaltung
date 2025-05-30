@@ -551,6 +551,16 @@
                     showEditForm(tournament);
                 };
 
+                // Create matrix button
+                const matrixButton = document.createElement('button');
+                matrixButton.className = 'edit-btn';
+                matrixButton.style.backgroundColor = '#2196F3';// Blue color to distinguish it
+                matrixButton.style.marginLeft = '10px';
+                matrixButton.textContent = 'Edit Matrix';
+                matrixButton.onclick = function() {
+                    window.location.href = `matrix_table.html?tournamentId=${tournament.tournamentId}&tournamentName=${encodeURIComponent(tournament.name)}`;
+                };
+
                 // Create delete button
                 const deleteButton = document.createElement('button');
                 deleteButton.className = 'delete-btn';
@@ -565,6 +575,7 @@
                 tournamentItem.appendChild(tournamentName);
                 tournamentItem.appendChild(tournamentDates);
                 tournamentItem.appendChild(editButton);
+                tournamentItem.appendChild(matrixButton);
                 tournamentItem.appendChild(deleteButton);
 
                 // Add the tournament item to the list

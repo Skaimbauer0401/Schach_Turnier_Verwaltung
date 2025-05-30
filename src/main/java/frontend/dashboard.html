@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>♟️</text></svg>">
-    <title>Chess Player Dashboard</title>
+    <title>Chess Dashboard</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -283,8 +283,6 @@
                 // Try both field names for ID
                 document.getElementById('person-id').textContent = user.id || user.personId;
                 document.getElementById('person-username').textContent = user.username;
-                // Try both field names for admin status
-                document.getElementById('person-admin').textContent = (user.admin !== undefined) ? (user.admin ? 'Yes' : 'No') : 'Unknown';
                 // Try both field names for stats
                 document.getElementById('person-wins').textContent = user.wins || 0;
                 document.getElementById('person-losses').textContent = user.losses || 0;
@@ -431,8 +429,11 @@
                     if (result === "Tournament existiert nicht") {
                         messageDiv.textContent = 'This tournament does not exist';
                         messageDiv.style.backgroundColor = '#ffcccc';
+                    } else if (result === "Spieler ist bereits für dieses Tournament registriert") {
+                        messageDiv.textContent = 'Error: You are already registered for this tournament';
+                        messageDiv.style.backgroundColor = '#ffcccc';
                     } else if (result === "SQL Fehler") {
-                        messageDiv.textContent = 'Error: You might already be registered for this tournament';
+                        messageDiv.textContent = 'A database error occurred';
                         messageDiv.style.backgroundColor = '#ffcccc';
                     } else {
                         messageDiv.textContent = 'Successfully joined the tournament';

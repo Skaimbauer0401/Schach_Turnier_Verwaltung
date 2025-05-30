@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>♟️</text></svg>">
+    <title>Chess Match Matrix</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 10px;
+            background-color: #f5f5f5;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 20px);
+            overflow: hidden;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin: 5px 0;
+        }
+        h2#tournament-title {
+            color: #2196F3;
+            text-align: center;
+            margin: 5px 0;
+            font-size: 1.2em;
+        }
+        .description {
+            text-align: center;
+            margin-bottom: 10px;
+            padding: 5px;
+            background-color: #e9f7ef;
+            border-radius: 5px;
+        }
+        .controls {
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .player-input {
+            display: flex;
+            align-items: center;
+        }
+        input[type="text"] {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .matrix-container {
+            overflow: auto;
+            flex: 1;
+            min-height: 0;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 4px;
+            text-align: center;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+            position: sticky;
+            top: 0;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        .player-name {
+            font-weight: bold;
+            background-color: #4CAF50;
+            color: white;
+        }
+        .match-cell {
+            position: relative;
+        }
+        .match-cell.disabled {
+            background-color: #ddd;
+        }
+        .result-selector {
+            display: none;
+            position: absolute;
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 10;
+            width: 120px;
+        }
+        .result-option {
+            padding: 8px;
+            cursor: pointer;
+        }
+        .result-option:hover {
+            background-color: #f1f1f1;
+        }
+        .win {
+            color: green;
+            font-weight: bold;
+        }
+        .loss {
+            color: red;
+            font-weight: bold;
+        }
+        .draw {
+            color: orange;
+            font-weight: bold;
+        }
+        .legend {
+            margin-top: 10px;
+            margin-bottom: 10px;
+            padding: 5px;
+            background-color: #f1f1f1;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+        .legend-item {
+            margin: 2px 0;
+        }
+        .legend-content {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Chess Match Matrix</h1>
+        <h2 id="tournament-title">Tournament: </h2>
+
+        <div class="description">
+            This matrix shows match results between players. Click on a cell to record a win, loss, or draw.
+        </div>
+
+        <div class="controls">
+        </div>
+
+        <div class="legend">
+            <div class="legend-content" id="legend-content">
+                <div class="legend-item"><span class="win">← W</span> - Win (Row player won against Column player)</div>
+                <div class="legend-item"><span class="loss">← L</span> - Loss (Row player lost to Column player)</div>
+                <div class="legend-item"><span class="draw">← D</span> - Draw (Row player drew with Column player)</div>
+                <div class="legend-item">Empty - No result recorded</div>
+            </div>
+        </div>
+
+        <div class="matrix-container" style="padding-bottom: 20px;">
+            <table id="match-matrix">
+                <tr>
+                    <th>Players</th>
+                </tr>
+            </table>
+        </div>
+
+        <div class="button-container" style="margin-top: 20px; margin-bottom: 20px; display: flex; justify-content: center; gap: 10px;">
+            <button onclick="goBack()" style="background-color: #2196F3;">Back to Previous Page</button>
+            <button onclick="resetMatrix()">Reset Matrix</button>
+        </div>
+    </div>
+
+    <script>
+        // Store players and match results
+        let players = [];
+        let matchResults = {};
+
+
+        // This function has been removed as we now fetch players from the API
+
+        // Function to update the matrix table
+        function updateMatrix() {
+            const table = document.getElementById('match-matrix');
+
+            // Clear the table except for the header row
+            while (table.rows.length > 1) {
+                table.deleteRow(1);
+            }
+
+            // Update header row with player names
+            const headerRow = table.rows[0];
+            while (headerRow.cells.length > 1) {
+                headerRow.deleteCell(1);
+            }
+
+            players.forEach(player => {
+                const th = document.createElement('th');
+                th.textContent = player;
+                headerRow.appendChild(th);
+            });
+
+            // Create rows for each player
+            players.forEach((rowPlayer, rowIndex) => {
+                const row = table.insertRow();
+
+                // Add player name as first cell
+                const playerCell = row.insertCell();
+                playerCell.textContent = rowPlayer;
+                playerCell.className = 'player-name';
+
+                // Add match cells
+                players.forEach((colPlayer, colIndex) => {
+                    const cell = row.insertCell();
+
+                    if (rowIndex === colIndex) {
+                        // Same player, disable cell
+                        cell.className = 'match-cell disabled';
+                        cell.textContent = '-';
+                    } else {
+                        // Different players, enable cell
+                        cell.className = 'match-cell';
+
+                        // Set existing result if available
+                        const matchKey = `${rowPlayer}-${colPlayer}`;
+                        if (matchResults[matchKey]) {
+                            const result = matchResults[matchKey];
+                            cell.textContent = result === 'W' ? '← W' : result === 'L' ? '← L' : '← D';
+                            cell.className += result === 'W' ? ' win' : result === 'L' ? ' loss' : ' draw';
+                        } else {
+                            cell.textContent = '';
+                        }
+
+                        // Add click event to set result
+                        cell.onclick = function() {
+                            toggleResultSelector(cell, rowPlayer, colPlayer);
+                        };
+                    }
+                });
+            });
+        }
+
+        // Function to toggle result selector
+        function toggleResultSelector(cell, rowPlayer, colPlayer) {
+            // Remove any existing selectors
+            const existingSelectors = document.querySelectorAll('.result-selector');
+            existingSelectors.forEach(selector => selector.remove());
+
+            // Create result selector
+            const selector = document.createElement('div');
+            selector.className = 'result-selector';
+
+            // Add options
+            const options = [
+                { value: 'W', text: 'Win', class: 'win' },
+                { value: 'L', text: 'Loss', class: 'loss' },
+                { value: 'D', text: 'Draw', class: 'draw' },
+                { value: '', text: 'Clear', class: '' }
+            ];
+
+            options.forEach(option => {
+                const optionElement = document.createElement('div');
+                optionElement.className = 'result-option';
+                if (option.class) {
+                    optionElement.classList.add(option.class);
+                }
+                optionElement.textContent = option.text;
+                optionElement.onclick = function() {
+                    setMatchResult(rowPlayer, colPlayer, option.value);
+                    selector.remove();
+                };
+                selector.appendChild(optionElement);
+            });
+
+            // Add selector to cell
+            cell.appendChild(selector);
+            selector.style.display = 'block';
+
+            // Position the selector directly under the cell
+            // Set position to be relative to the cell
+            cell.style.position = 'relative';
+            selector.style.top = '100%';
+            selector.style.left = '0';
+
+            // Ensure the selector is visible in the viewport
+            setTimeout(() => {
+                const selectorRect = selector.getBoundingClientRect();
+                const viewportHeight = window.innerHeight;
+
+                // If the selector would go below the viewport, position it above the cell instead
+                if (selectorRect.bottom > viewportHeight) {
+                    selector.style.top = 'auto';
+                    selector.style.bottom = '100%';
+                }
+            }, 0);
+
+            // Close selector when clicking outside
+            document.addEventListener('click', function closeSelector(e) {
+                if (!selector.contains(e.target) && e.target !== cell) {
+                    selector.remove();
+                    document.removeEventListener('click', closeSelector);
+                }
+            });
+        }
+
+        // Function to set match result
+        function setMatchResult(rowPlayer, colPlayer, result) {
+            const matchKey = `${rowPlayer}-${colPlayer}`;
+            const oppositeMatchKey = `${colPlayer}-${rowPlayer}`;
+
+            if (result === '') {
+                // Clear result for both cells
+                delete matchResults[matchKey];
+                delete matchResults[oppositeMatchKey];
+            } else {
+                // Set result
+                matchResults[matchKey] = result;
+
+                // Update opposite match result automatically
+                if (result === 'W') {
+                    matchResults[oppositeMatchKey] = 'L';
+                } else if (result === 'L') {
+                    matchResults[oppositeMatchKey] = 'W';
+                } else if (result === 'D') {
+                    matchResults[oppositeMatchKey] = 'D';
+                }
+            }
+
+            // Update matrix
+            updateMatrix();
+        }
+
+        // Function to reset the matrix
+        function resetMatrix() {
+            if (confirm('Are you sure you want to reset the matrix? All match results will be cleared.')) {
+                matchResults = {};
+                updateMatrix();
+            }
+        }
+
+        // Function to go back to the previous page
+        function goBack() {
+            window.history.back();
+        }
+
+        // Fetch players from the tournament API
+        function fetchPlayersFromTournament(tournamentId) {
+            if (!tournamentId) {
+                console.error('No tournament ID provided');
+                return;
+            }
+
+            fetch(`http://localhost:8080/persons/person/getPersonByTournament/${tournamentId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+
+                    // Check the content type to see if it's JSON
+                    const contentType = response.headers.get('content-type');
+                    if (contentType && contentType.includes('application/json')) {
+                        return response.json();
+                    } else {
+                        // If it's not JSON, get the text and then throw an error with the message
+                        return response.text().then(text => {
+                            throw new Error(`Server returned non-JSON response: ${text}`);
+                        });
+                    }
+                })
+                .then(data => {
+                    // Clear existing players
+                    players = [];
+
+                    // Check if data is an empty array
+                    if (data.length === 0) {
+                        console.log('No players found for this tournament');
+                        alert('No players found for this tournament. Please add players to the tournament first.');
+                        return;
+                    }
+
+                    // Add players from API response
+                    data.forEach(person => {
+                        players.push(person.username);
+                    });
+
+                    // Update the matrix with the new players
+                    updateMatrix();
+                })
+                .catch(error => {
+                    console.error('Error fetching players:', error);
+                    alert('Failed to load players from tournament: ' + error.message);
+                });
+        }
+
+        // Function to get URL parameters
+        function getUrlParameter(name) {
+            name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+            var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+            var results = regex.exec(location.search);
+            return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+        }
+
+        // Initialize the matrix when page loads
+        window.onload = function() {
+            // Get tournament information from URL parameters
+            const tournamentId = getUrlParameter('tournamentId');
+            const tournamentName = getUrlParameter('tournamentName');
+
+            // Display tournament information if available
+            if (tournamentId && tournamentName) {
+                document.getElementById('tournament-title').textContent = `Tournament: ${tournamentName} (ID: ${tournamentId})`;
+
+                // Fetch players for this tournament
+                fetchPlayersFromTournament(tournamentId);
+            } else {
+                alert('No tournament information provided. Please access this page from the tournament dashboard.');
+            }
+        };
+    </script>
+</body>
+</html>

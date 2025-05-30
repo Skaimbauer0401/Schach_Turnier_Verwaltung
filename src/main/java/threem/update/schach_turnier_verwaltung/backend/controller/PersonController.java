@@ -2,6 +2,10 @@ package threem.update.schach_turnier_verwaltung.backend.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -133,13 +137,13 @@ public class PersonController {
         //Datenbank verbinden und Person hinzufügen, falls nicht bereits vorhanden
         Connection con = DriverManager.getConnection(url, user, dbpassword);
         Statement stmt = con.createStatement();
-        ResultSet rs = stmt.executeQuery("SELECT username FROM persons ORDER BY username ASC");
+        ResultSet rs = stmt.executeQuery("SELECT personid, username FROM persons ORDER BY username ASC");
 
         ObjectMapper objectMapper;
         String jsonPerson = "";
 
         while (rs.next()) {
-            Person person = new Person(1, rs.getString("username"), "x", false, 0, 0, 0);
+            Person person = new Person(rs.getInt("personid"), rs.getString("username"), "nene das tust du nicht", false, 0, 0, 0);
 
             objectMapper = new ObjectMapper();
             jsonPerson += objectMapper.writeValueAsString(person);
@@ -170,6 +174,19 @@ public class PersonController {
                 return "Tournament existiert nicht";
             }
 
+            // Check if the person is already registered for this tournament
+            PreparedStatement checkDuplicate = con.prepareStatement("SELECT COUNT(*) FROM persons_tournaments WHERE personId = ? AND tournamentId = ?");
+            checkDuplicate.setInt(1, personId);
+            checkDuplicate.setInt(2, tournamentId);
+            ResultSet duplicateRs = checkDuplicate.executeQuery();
+            duplicateRs.next();
+            int duplicateCount = duplicateRs.getInt(1);
+
+            if (duplicateCount > 0) {
+                con.close();
+                return "Spieler ist bereits für dieses Tournament registriert";
+            }
+
             PreparedStatement pstmt = con.prepareStatement("INSERT INTO persons_tournaments (personID, tournamentID) VALUES (?, ?)");
             pstmt.setInt(1, personId);
             pstmt.setInt(2, tournamentId);
@@ -180,6 +197,51 @@ public class PersonController {
 
         } catch (SQLException e) {
             return "SQL Fehler";
+        }
+    }
+
+
+    @GetMapping("/persons/person/getPersonByTournament/{tournamentId}")
+    public ResponseEntity<?> getPersonsByTournament(@PathVariable int tournamentId) {
+        File file = new File("DB/database");
+        url = "jdbc:derby:" + file.getAbsolutePath();
+
+        //Datenbank verbinden
+        try {
+            Connection con = DriverManager.getConnection(url, user, dbpassword);
+
+            // First check if the tournament exists
+            PreparedStatement result = con.prepareStatement("SELECT * FROM persons_tournaments pt JOIN persons p on pt.personId = p.personId WHERE pt.tournamentId = ?");
+            result.setInt(1, tournamentId);
+            ResultSet rs = result.executeQuery();
+            String jsonPersons = "";
+            while(rs.next()){
+                Person person = new Person(rs.getInt("personId"), rs.getString("username"), "nene das tust du nicht", false, 0, 0, 0);
+                ObjectMapper objectMapper = new ObjectMapper();
+                jsonPersons += objectMapper.writeValueAsString(person)+",";
+            }
+
+            con.close();
+
+            // Check if jsonPersons is empty (no players found)
+            if (jsonPersons.isEmpty()) {
+                HttpHeaders headers = new HttpHeaders();
+                headers.setContentType(MediaType.APPLICATION_JSON);
+                return new ResponseEntity<>("[]", headers, HttpStatus.OK);
+            }
+
+            // Remove the trailing comma
+            jsonPersons = jsonPersons.substring(0, jsonPersons.length() - 1);
+
+            // Set content type to application/json
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            return new ResponseEntity<>("["+jsonPersons+"]", headers, HttpStatus.OK);
+
+        } catch (SQLException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("SQL Fehler");
+        } catch (JsonProcessingException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("JSON Fehler");
         }
     }
 }
