@@ -109,19 +109,39 @@
         .result-selector {
             display: none;
             position: absolute;
-            background-color: white;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
             z-index: 10;
             width: 120px;
+            overflow: hidden;
         }
         .result-option {
-            padding: 8px;
+            padding: 10px;
             cursor: pointer;
+            transition: background-color 0.2s;
+            text-align: center;
+            font-weight: bold;
+        }
+        .result-option:nth-child(1) {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .result-option:nth-child(2) {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .result-option:nth-child(3) {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .result-option:nth-child(4) {
+            background-color: #e2e3e5;
+            color: #383d41;
         }
         .result-option:hover {
-            background-color: #f1f1f1;
+            filter: brightness(0.95);
         }
         .win {
             color: green;
@@ -188,77 +208,126 @@
     </div>
 
     <script>
-        // Store players and match results
+        // Global variables
         let players = [];
         let matchResults = {};
+        let tournamentId = '';
+        let tournamentName = '';
 
+        // Function to get URL parameters
+        function getUrlParameter(name) {
+            name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+            var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+            var results = regex.exec(location.search);
+            return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+        }
 
-        // This function has been removed as we now fetch players from the API
+        // Function to go back to previous page
+        function goBack() {
+            window.history.back();
+        }
 
-        // Function to update the matrix table
-        function updateMatrix() {
+        // Function to reset the matrix
+        function resetMatrix() {
+            if (confirm('Are you sure you want to reset all match results?')) {
+                matchResults = {};
+                updateMatrix();
+            }
+        }
+
+        // Function to fetch players for a tournament
+        function fetchPlayersFromTournament(tournamentId) {
+            fetch(`http://localhost:8080/persons/person/getPersonByTournament/${tournamentId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Fetched players:', data);
+                    players = data;
+
+                    // Create a map of player IDs to names for later use
+                    const playerIdToName = {};
+                    players.forEach(player => {
+                        playerIdToName[player.id] = player.username;
+                    });
+
+                    // Build the matrix with the players
+                    buildMatrix(players);
+
+                    // Fetch match results after building the matrix
+                    fetchMatchResults(tournamentId, playerIdToName);
+                })
+                .catch(error => {
+                    console.error('Error fetching players:', error);
+                    alert('Failed to load players. Please try again later.');
+                });
+        }
+
+        // Function to build the matrix table
+        function buildMatrix(players) {
             const table = document.getElementById('match-matrix');
 
-            // Clear the table except for the header row
-            while (table.rows.length > 1) {
-                table.deleteRow(1);
-            }
+            // Clear existing table content
+            table.innerHTML = '';
 
-            // Update header row with player names
-            const headerRow = table.rows[0];
-            while (headerRow.cells.length > 1) {
-                headerRow.deleteCell(1);
-            }
+            // Create header row with player names
+            const headerRow = document.createElement('tr');
+            const cornerCell = document.createElement('th');
+            cornerCell.textContent = 'Players';
+            headerRow.appendChild(cornerCell);
 
             players.forEach(player => {
                 const th = document.createElement('th');
-                th.textContent = player;
+                th.textContent = player.username + ' (' + player.id + ')';
                 headerRow.appendChild(th);
             });
 
+            table.appendChild(headerRow);
+
             // Create rows for each player
             players.forEach((rowPlayer, rowIndex) => {
-                const row = table.insertRow();
+                const row = document.createElement('tr');
 
-                // Add player name as first cell
-                const playerCell = row.insertCell();
-                playerCell.textContent = rowPlayer;
-                playerCell.className = 'player-name';
+                // Add player name as first cell in the row
+                const nameCell = document.createElement('td');
+                nameCell.textContent = rowPlayer.username + ' (' + rowPlayer.id + ')';
+                nameCell.className = 'player-name';
+                row.appendChild(nameCell);
 
-                // Add match cells
+                // Add match cells for each player
                 players.forEach((colPlayer, colIndex) => {
-                    const cell = row.insertCell();
+                    const cell = document.createElement('td');
 
                     if (rowIndex === colIndex) {
-                        // Same player, disable cell
+                        // Diagonal cells (player vs themselves) are disabled
                         cell.className = 'match-cell disabled';
-                        cell.textContent = '-';
+                        cell.textContent = 'X';
                     } else {
-                        // Different players, enable cell
                         cell.className = 'match-cell';
+                        cell.dataset.row = rowPlayer.id;
+                        cell.dataset.col = colPlayer.id;
+                        cell.dataset.rowName = rowPlayer.username;
+                        cell.dataset.colName = colPlayer.username;
 
-                        // Set existing result if available
-                        const matchKey = `${rowPlayer}-${colPlayer}`;
-                        if (matchResults[matchKey]) {
-                            const result = matchResults[matchKey];
-                            cell.textContent = result === 'W' ? '← W' : result === 'L' ? '← L' : '← D';
-                            cell.className += result === 'W' ? ' win' : result === 'L' ? ' loss' : ' draw';
-                        } else {
-                            cell.textContent = '';
-                        }
-
-                        // Add click event to set result
-                        cell.onclick = function() {
-                            toggleResultSelector(cell, rowPlayer, colPlayer);
-                        };
+                        // Add click event to show result selector
+                        cell.addEventListener('click', function() {
+                            showResultSelector(this);
+                        });
                     }
+
+                    row.appendChild(cell);
                 });
+
+                table.appendChild(row);
             });
         }
 
-        // Function to toggle result selector
-        function toggleResultSelector(cell, rowPlayer, colPlayer) {
-            // Remove any existing selectors
+        // Function to show result selector
+        function showResultSelector(cell) {
+            // Remove any existing result selectors
             const existingSelectors = document.querySelectorAll('.result-selector');
             existingSelectors.forEach(selector => selector.remove());
 
@@ -268,47 +337,28 @@
 
             // Add options
             const options = [
-                { value: 'W', text: 'Win', class: 'win' },
-                { value: 'L', text: 'Loss', class: 'loss' },
-                { value: 'D', text: 'Draw', class: 'draw' },
-                { value: '', text: 'Clear', class: '' }
+                { text: 'Win', value: 'W', class: 'win' },
+                { text: 'Loss', value: 'L', class: 'loss' },
+                { text: 'Draw', value: 'D', class: 'draw' },
+                { text: 'Clear', value: '', class: '' }
             ];
 
             options.forEach(option => {
                 const optionElement = document.createElement('div');
                 optionElement.className = 'result-option';
-                if (option.class) {
-                    optionElement.classList.add(option.class);
-                }
                 optionElement.textContent = option.text;
-                optionElement.onclick = function() {
-                    setMatchResult(rowPlayer, colPlayer, option.value);
+
+                optionElement.addEventListener('click', function() {
+                    setMatchResult(cell, option.value, option.class);
                     selector.remove();
-                };
+                });
+
                 selector.appendChild(optionElement);
             });
 
-            // Add selector to cell
+            // Position and show the selector
             cell.appendChild(selector);
             selector.style.display = 'block';
-
-            // Position the selector directly under the cell
-            // Set position to be relative to the cell
-            cell.style.position = 'relative';
-            selector.style.top = '100%';
-            selector.style.left = '0';
-
-            // Ensure the selector is visible in the viewport
-            setTimeout(() => {
-                const selectorRect = selector.getBoundingClientRect();
-                const viewportHeight = window.innerHeight;
-
-                // If the selector would go below the viewport, position it above the cell instead
-                if (selectorRect.bottom > viewportHeight) {
-                    selector.style.top = 'auto';
-                    selector.style.bottom = '100%';
-                }
-            }, 0);
 
             // Close selector when clicking outside
             document.addEventListener('click', function closeSelector(e) {
@@ -320,172 +370,96 @@
         }
 
         // Function to set match result
-        function setMatchResult(rowPlayer, colPlayer, result) {
-            const matchKey = `${rowPlayer}-${colPlayer}`;
-            const oppositeMatchKey = `${colPlayer}-${rowPlayer}`;
+        function setMatchResult(cell, result, resultClass) {
+            const rowPlayerId = cell.dataset.row;
+            const colPlayerId = cell.dataset.col;
+            const rowPlayerName = cell.dataset.rowName;
+            const colPlayerName = cell.dataset.colName;
 
-            if (result === '') {
-                // Clear result for both cells
-                delete matchResults[matchKey];
-                delete matchResults[oppositeMatchKey];
-            } else {
-                // Set result
-                matchResults[matchKey] = result;
+            // Store the result for the clicked cell
+            if (result) {
+                matchResults[`${rowPlayerId}-${colPlayerId}`] = result;
 
-                // Update opposite match result automatically
+                // Calculate and store the inverse result for the opposite cell
+                let inverseResult = '';
+                let inverseClass = '';
+
                 if (result === 'W') {
-                    matchResults[oppositeMatchKey] = 'L';
+                    inverseResult = 'L'; // If player1 won, player2 lost
+                    inverseClass = 'loss';
                 } else if (result === 'L') {
-                    matchResults[oppositeMatchKey] = 'W';
+                    inverseResult = 'W'; // If player1 lost, player2 won
+                    inverseClass = 'win';
                 } else if (result === 'D') {
-                    matchResults[oppositeMatchKey] = 'D';
+                    inverseResult = 'D'; // If it was a draw, it's still a draw
+                    inverseClass = 'draw';
+                }
+
+                // Store the inverse result
+                if (inverseResult) {
+                    matchResults[`${colPlayerId}-${rowPlayerId}`] = inverseResult;
+
+                    // Find and update the inverse cell
+                    const inverseCell = document.querySelector(`.match-cell[data-row="${colPlayerId}"][data-col="${rowPlayerId}"]`);
+                    if (inverseCell) {
+                        updateCellDisplay(inverseCell, inverseResult, inverseClass);
+                    }
+                }
+            } else {
+                // If result is empty (Clear option), delete both entries
+                delete matchResults[`${rowPlayerId}-${colPlayerId}`];
+                delete matchResults[`${colPlayerId}-${rowPlayerId}`];
+
+                // Find and clear the inverse cell
+                const inverseCell = document.querySelector(`.match-cell[data-row="${colPlayerId}"][data-col="${rowPlayerId}"]`);
+                if (inverseCell) {
+                    updateCellDisplay(inverseCell, '', '');
                 }
             }
 
-            // Update matrix
-            updateMatrix();
+            // Update the clicked cell display
+            updateCellDisplay(cell, result, resultClass);
         }
 
-        // Function to reset the matrix
-        function resetMatrix() {
-            if (confirm('Are you sure you want to reset the matrix? All match results will be cleared.')) {
-                matchResults = {};
-                updateMatrix();
+        // Function to update cell display
+        function updateCellDisplay(cell, result, resultClass) {
+            // Clear existing content
+            cell.textContent = '';
+            cell.classList.remove('win', 'loss', 'draw');
+
+            if (result) {
+                // Add the result text with the appropriate class
+                cell.textContent = `← ${result}`;
+                cell.classList.add(resultClass);
             }
         }
 
-        // Function to go back to the previous page
-        function goBack() {
-            window.history.back();
+        // Function to update the entire matrix with current results
+        function updateMatrix() {
+            // Clear all cells first
+            const cells = document.querySelectorAll('.match-cell:not(.disabled)');
+            cells.forEach(cell => {
+                cell.textContent = '';
+                cell.classList.remove('win', 'loss', 'draw');
+            });
+
+            // Update cells with current match results
+            for (const [key, result] of Object.entries(matchResults)) {
+                const [rowPlayerId, colPlayerId] = key.split('-');
+                const cell = document.querySelector(`.match-cell[data-row="${rowPlayerId}"][data-col="${colPlayerId}"]`);
+
+                if (cell) {
+                    let resultClass = '';
+                    if (result === 'W') resultClass = 'win';
+                    else if (result === 'L') resultClass = 'loss';
+                    else if (result === 'D') resultClass = 'draw';
+
+                    updateCellDisplay(cell, result, resultClass);
+                }
+            }
         }
 
-        // Function to save match results to the database
-        function saveMatches() {
-            const tournamentId = getUrlParameter('tournamentId');
-            if (!tournamentId) {
-                alert('No tournament ID found. Cannot save matches.');
-                return;
-            }
-
-            // Check if there are any match results to save
-            if (Object.keys(matchResults).length === 0) {
-                alert('No match results to save.');
-                return;
-            }
-
-            // Convert matchResults to a format suitable for the backend
-            // We need to map player names to player IDs
-            const matchData = {};
-
-            // Get player IDs from the URL or fetch them from the server
-            fetch(`http://localhost:8080/persons/person/getPersonByTournament/${tournamentId}`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    // Create a map of player names to IDs
-                    const playerMap = {};
-                    data.forEach(person => {
-                        playerMap[person.username] = person.personId;
-                    });
-
-                    // Convert match results using player IDs
-                    for (const [key, result] of Object.entries(matchResults)) {
-                        const [player1Name, player2Name] = key.split('-');
-                        const player1Id = playerMap[player1Name];
-                        const player2Id = playerMap[player2Name];
-
-                        if (player1Id && player2Id) {
-                            matchData[`${player1Id}-${player2Id}`] = result;
-                        }
-                    }
-
-                    // Send the data to the server
-                    return fetch(`http://localhost:8080/tournaments/addMatches/${tournamentId}`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(matchData)
-                    });
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.text();
-                })
-                .then(data => {
-                    alert('Matches saved successfully: ' + data);
-                })
-                .catch(error => {
-                    console.error('Error saving matches:', error);
-                    alert('Failed to save matches: ' + error.message);
-                });
-        }
-
-        // Fetch players from the tournament API
-        function fetchPlayersFromTournament(tournamentId) {
-            if (!tournamentId) {
-                console.error('No tournament ID provided');
-                return;
-            }
-
-            fetch(`http://localhost:8080/persons/person/getPersonByTournament/${tournamentId}`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-
-                    // Check the content type to see if it's JSON
-                    const contentType = response.headers.get('content-type');
-                    if (contentType && contentType.includes('application/json')) {
-                        return response.json();
-                    } else {
-                        // If it's not JSON, get the text and then throw an error with the message
-                        return response.text().then(text => {
-                            throw new Error(`Server returned non-JSON response: ${text}`);
-                        });
-                    }
-                })
-                .then(data => {
-                    // Clear existing players
-                    players = [];
-
-                    // Check if data is an empty array
-                    if (data.length === 0) {
-                        console.log('No players found for this tournament');
-                        alert('No players found for this tournament. Please add players to the tournament first.');
-                        return;
-                    }
-
-                    // Add players from API response
-                    data.forEach(person => {
-                        players.push(person.username);
-                    });
-
-                    // Create a map of player IDs to names for later use
-                    const playerIdToName = {};
-                    data.forEach(person => {
-                        playerIdToName[person.personId] = person.username;
-                    });
-
-                    // Update the matrix with the new players
-                    updateMatrix();
-
-                    // Fetch match results for this tournament
-                    fetchMatchResults(tournamentId, playerIdToName);
-                })
-                .catch(error => {
-                    console.error('Error fetching players:', error);
-                    alert('Failed to load players from tournament: ' + error.message);
-                });
-        }
-
-        // Fetch match results from the tournament API
+        // Function to fetch match results from the tournament API
         function fetchMatchResults(tournamentId, playerIdToName) {
             fetch(`http://localhost:8080/tournaments/getMatches/${tournamentId}`)
                 .then(response => {
@@ -503,13 +477,22 @@
                         // Parse the key to get player IDs (format: "player1Id-player2Id")
                         const [player1Id, player2Id] = key.split('-');
 
-                        // Convert player IDs to names
-                        const player1Name = playerIdToName[player1Id];
-                        const player2Name = playerIdToName[player2Id];
+                        // Store the original match result
+                        matchResults[key] = result;
 
-                        if (player1Name && player2Name) {
-                            // Store the match result with player names as the key
-                            matchResults[`${player1Name}-${player2Name}`] = result;
+                        // Store the inverse match result for the opposite cell
+                        let inverseResult = '';
+                        if (result === 'W') {
+                            inverseResult = 'L'; // If player1 won, player2 lost
+                        } else if (result === 'L') {
+                            inverseResult = 'W'; // If player1 lost, player2 won
+                        } else if (result === 'D') {
+                            inverseResult = 'D'; // If it was a draw, it's still a draw
+                        }
+
+                        // Only add the inverse result if we have a valid result
+                        if (inverseResult) {
+                            matchResults[`${player2Id}-${player1Id}`] = inverseResult;
                         }
                     }
 
@@ -523,28 +506,45 @@
                 });
         }
 
-        // Function to get URL parameters
-        function getUrlParameter(name) {
-            name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
-            var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
-            var results = regex.exec(location.search);
-            return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+        // Function to save matches
+        function saveMatches() {
+            fetch(`http://localhost:8080/tournaments/addMatches/${tournamentId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(matchResults)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.text();
+            })
+            .then(data => {
+                alert('Match results saved successfully!');
+                console.log('Save response:', data);
+            })
+            .catch(error => {
+                console.error('Error saving match results:', error);
+                alert('Failed to save match results. Please try again later.');
+            });
         }
 
-        // Initialize the matrix when page loads
+        // Initialize the page when loaded
         window.onload = function() {
             // Get tournament information from URL parameters
-            const tournamentId = getUrlParameter('tournamentId');
-            const tournamentName = getUrlParameter('tournamentName');
+            tournamentId = getUrlParameter('tournamentId');
+            tournamentName = getUrlParameter('tournamentName');
 
-            // Display tournament information if available
-            if (tournamentId && tournamentName) {
-                document.getElementById('tournament-title').textContent = `Tournament: ${tournamentName} (ID: ${tournamentId})`;
+            // Display tournament name
+            document.getElementById('tournament-title').textContent = 'Tournament: ' + tournamentName;
 
-                // Fetch players for this tournament
+            // Fetch players for the tournament
+            if (tournamentId) {
                 fetchPlayersFromTournament(tournamentId);
             } else {
-                alert('No tournament information provided. Please access this page from the tournament dashboard.');
+                alert('No tournament ID provided. Please go back and select a tournament.');
             }
         };
     </script>

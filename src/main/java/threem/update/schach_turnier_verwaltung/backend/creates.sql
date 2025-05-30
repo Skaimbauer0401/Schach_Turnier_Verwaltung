@@ -19,7 +19,7 @@ CREATE TABLE matches (
 Insert Into persons (username, password, admin, wins, losses, draws) Values ('Skaimbauer2','test',false,10,10,10);
 INSERT INTO tournaments (name,start_time,end_time) Values ('tournament2',CURRENT_TIMESTAMP,'2025-05-21 14:30:00');
 INSERT INTO persons_tournaments (personId, tournamentId) VALUES (1,1);
-INSERT INTO matches (tournamentId, player1Id, player2Id, result) VALUES (5, 1, 2, 'W');
+INSERT INTO matches (tournamentId, player1Id, player2Id, result) VALUES (1, 2, 3, 'W');
 
 
 SELECT t.*
