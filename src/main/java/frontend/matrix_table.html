@@ -155,6 +155,10 @@
             color: orange;
             font-weight: bold;
         }
+        .not-played {
+            color: gray;
+            font-weight: bold;
+        }
         .legend {
             margin-top: 10px;
             margin-bottom: 10px;
@@ -188,7 +192,7 @@
                 <div class="legend-item"><span class="win">← W</span> - Win (Row player won against Column player)</div>
                 <div class="legend-item"><span class="loss">← L</span> - Loss (Row player lost to Column player)</div>
                 <div class="legend-item"><span class="draw">← D</span> - Draw (Row player drew with Column player)</div>
-                <div class="legend-item">Empty - No result recorded</div>
+                <div class="legend-item"><span class="not-played">← N/A</span> - Not played</div>
             </div>
         </div>
 
@@ -229,8 +233,15 @@
 
         // Function to reset the matrix
         function resetMatrix() {
-            if (confirm('Are you sure you want to reset all match results?')) {
-                matchResults = {};
+            if (confirm('Are you sure you want to reset all match results to N/A?')) {
+                // Create N/A entries for all player combinations
+                players.forEach(player1 => {
+                    players.forEach(player2 => {
+                        if (player1.id !== player2.id) {
+                            matchResults[`${player1.id}-${player2.id}`] = 'N/A';
+                        }
+                    });
+                });
                 updateMatrix();
             }
         }
@@ -312,6 +323,10 @@
                         cell.dataset.rowName = rowPlayer.username;
                         cell.dataset.colName = colPlayer.username;
 
+                        // Initialize with N/A
+                        cell.textContent = '← N/A';
+                        cell.classList.add('not-played');
+
                         // Add click event to show result selector
                         cell.addEventListener('click', function() {
                             showResultSelector(this);
@@ -340,7 +355,7 @@
                 { text: 'Win', value: 'W', class: 'win' },
                 { text: 'Loss', value: 'L', class: 'loss' },
                 { text: 'Draw', value: 'D', class: 'draw' },
-                { text: 'Clear', value: '', class: '' }
+                { text: 'N/A', value: 'N/A', class: 'not-played' }
             ];
 
             options.forEach(option => {
@@ -377,43 +392,34 @@
             const colPlayerName = cell.dataset.colName;
 
             // Store the result for the clicked cell
-            if (result) {
-                matchResults[`${rowPlayerId}-${colPlayerId}`] = result;
+            matchResults[`${rowPlayerId}-${colPlayerId}`] = result;
 
-                // Calculate and store the inverse result for the opposite cell
-                let inverseResult = '';
-                let inverseClass = '';
+            // Calculate and store the inverse result for the opposite cell
+            let inverseResult = '';
+            let inverseClass = '';
 
-                if (result === 'W') {
-                    inverseResult = 'L'; // If player1 won, player2 lost
-                    inverseClass = 'loss';
-                } else if (result === 'L') {
-                    inverseResult = 'W'; // If player1 lost, player2 won
-                    inverseClass = 'win';
-                } else if (result === 'D') {
-                    inverseResult = 'D'; // If it was a draw, it's still a draw
-                    inverseClass = 'draw';
-                }
+            if (result === 'W') {
+                inverseResult = 'L'; // If player1 won, player2 lost
+                inverseClass = 'loss';
+            } else if (result === 'L') {
+                inverseResult = 'W'; // If player1 lost, player2 won
+                inverseClass = 'win';
+            } else if (result === 'D') {
+                inverseResult = 'D'; // If it was a draw, it's still a draw
+                inverseClass = 'draw';
+            } else if (result === 'N/A') {
+                inverseResult = 'N/A'; // Not played is the same for both players
+                inverseClass = 'not-played';
+            }
 
-                // Store the inverse result
-                if (inverseResult) {
-                    matchResults[`${colPlayerId}-${rowPlayerId}`] = inverseResult;
+            // Store the inverse result
+            if (inverseResult) {
+                matchResults[`${colPlayerId}-${rowPlayerId}`] = inverseResult;
 
-                    // Find and update the inverse cell
-                    const inverseCell = document.querySelector(`.match-cell[data-row="${colPlayerId}"][data-col="${rowPlayerId}"]`);
-                    if (inverseCell) {
-                        updateCellDisplay(inverseCell, inverseResult, inverseClass);
-                    }
-                }
-            } else {
-                // If result is empty (Clear option), delete both entries
-                delete matchResults[`${rowPlayerId}-${colPlayerId}`];
-                delete matchResults[`${colPlayerId}-${rowPlayerId}`];
-
-                // Find and clear the inverse cell
+                // Find and update the inverse cell
                 const inverseCell = document.querySelector(`.match-cell[data-row="${colPlayerId}"][data-col="${rowPlayerId}"]`);
                 if (inverseCell) {
-                    updateCellDisplay(inverseCell, '', '');
+                    updateCellDisplay(inverseCell, inverseResult, inverseClass);
                 }
             }
 
@@ -425,22 +431,19 @@
         function updateCellDisplay(cell, result, resultClass) {
             // Clear existing content
             cell.textContent = '';
-            cell.classList.remove('win', 'loss', 'draw');
+            cell.classList.remove('win', 'loss', 'draw', 'not-played');
 
-            if (result) {
-                // Add the result text with the appropriate class
-                cell.textContent = `← ${result}`;
-                cell.classList.add(resultClass);
-            }
+            // Add the result text with the appropriate class
+            cell.textContent = `← ${result}`;
+            cell.classList.add(resultClass);
         }
 
         // Function to update the entire matrix with current results
         function updateMatrix() {
-            // Clear all cells first
+            // Clear all cells first and set default N/A
             const cells = document.querySelectorAll('.match-cell:not(.disabled)');
             cells.forEach(cell => {
-                cell.textContent = '';
-                cell.classList.remove('win', 'loss', 'draw');
+                updateCellDisplay(cell, 'N/A', 'not-played');
             });
 
             // Update cells with current match results
@@ -453,6 +456,7 @@
                     if (result === 'W') resultClass = 'win';
                     else if (result === 'L') resultClass = 'loss';
                     else if (result === 'D') resultClass = 'draw';
+                    else if (result === 'N/A') resultClass = 'not-played';
 
                     updateCellDisplay(cell, result, resultClass);
                 }
@@ -461,6 +465,16 @@
 
         // Function to fetch match results from the tournament API
         function fetchMatchResults(tournamentId, playerIdToName) {
+            // Initialize all possible matches with N/A values
+            matchResults = {};
+            players.forEach(player1 => {
+                players.forEach(player2 => {
+                    if (player1.id !== player2.id) {
+                        matchResults[`${player1.id}-${player2.id}`] = 'N/A';
+                    }
+                });
+            });
+
             fetch(`http://localhost:8080/tournaments/getMatches/${tournamentId}`)
                 .then(response => {
                     if (!response.ok) {
@@ -469,9 +483,6 @@
                     return response.json();
                 })
                 .then(data => {
-                    // Clear existing match results
-                    matchResults = {};
-
                     // Process each match result
                     for (const [key, result] of Object.entries(data)) {
                         // Parse the key to get player IDs (format: "player1Id-player2Id")
@@ -488,6 +499,8 @@
                             inverseResult = 'W'; // If player1 lost, player2 won
                         } else if (result === 'D') {
                             inverseResult = 'D'; // If it was a draw, it's still a draw
+                        } else if (result === 'N/A') {
+                            inverseResult = 'N/A'; // Not played is the same for both players
                         }
 
                         // Only add the inverse result if we have a valid result
@@ -503,6 +516,8 @@
                     console.error('Error fetching match results:', error);
                     // Don't show an alert for this error, as it's not critical
                     console.log('Failed to load match results. The matrix will be empty.');
+                    // Still update the matrix to show N/A for all cells
+                    updateMatrix();
                 });
         }
 

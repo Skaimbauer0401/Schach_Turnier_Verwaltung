@@ -100,46 +100,6 @@ public class TournamentController {
         }
     }
 
-    @GetMapping("/tournaments/getMatches/{tournamentId}")
-    public Map<String, String> getMatches(@PathVariable int tournamentId) {
-        File file = new File("DB/database");
-        url = "jdbc:derby:" + file.getAbsolutePath();
-        Map<String, String> matchResults = new HashMap<>();
-
-        try {
-            Connection con = DriverManager.getConnection(url, user, dbpassword);
-
-            // Prepare statement to get all matches for this tournament
-            PreparedStatement stmt = con.prepareStatement(
-                "SELECT player1Id, player2Id, result FROM matches WHERE tournamentId = ?"
-            );
-            stmt.setInt(1, tournamentId);
-            ResultSet rs = stmt.executeQuery();
-
-            // Process each match result
-            while (rs.next()) {
-                int player1Id = rs.getInt("player1Id");
-                int player2Id = rs.getInt("player2Id");
-                String result = rs.getString("result");
-
-                // Store the match result with player IDs as the key
-                matchResults.put(player1Id + "-" + player2Id, result);
-            }
-
-            rs.close();
-            stmt.close();
-            con.close();
-
-            return matchResults;
-        } catch (SQLException e) {
-            System.err.println("SQL Error: " + e.getMessage());
-            return new HashMap<>();
-        } catch (Exception e) {
-            System.err.println("Error: " + e.getMessage());
-            return new HashMap<>();
-        }
-    }
-
     @PostMapping("/tournaments/addMatches/{tournamentId}")
     public String addMatches(@PathVariable int tournamentId, @RequestBody Map<String, String> matchData) {
         File file = new File("DB/database");
@@ -180,6 +140,11 @@ public class TournamentController {
                     deleteStmt.setInt(3, player2Id);
                     deleteStmt.executeUpdate();
 
+                    // Convert N/A to N for database storage
+                    if (result.equals("N/A")) {
+                        result = "N";
+                    }
+
                     // Then insert the new match
                     insertStmt.setInt(1, tournamentId);
                     insertStmt.setInt(2, player1Id);
@@ -202,6 +167,51 @@ public class TournamentController {
             return "SQL Error: " + e.getMessage();
         } catch (Exception e) {
             return "Error: " + e.getMessage();
+        }
+    }
+
+    @GetMapping("/tournaments/getMatches/{tournamentId}")
+    public Map<String, String> getMatches(@PathVariable int tournamentId) {
+        File file = new File("DB/database");
+        url = "jdbc:derby:" + file.getAbsolutePath();
+        Map<String, String> matchResults = new HashMap<>();
+
+        try {
+            Connection con = DriverManager.getConnection(url, user, dbpassword);
+
+            // Prepare statement to get all matches for this tournament
+            PreparedStatement stmt = con.prepareStatement(
+                "SELECT player1Id, player2Id, result FROM matches WHERE tournamentId = ?"
+            );
+            stmt.setInt(1, tournamentId);
+            ResultSet rs = stmt.executeQuery();
+
+            // Process each match result
+            while (rs.next()) {
+                int player1Id = rs.getInt("player1Id");
+                int player2Id = rs.getInt("player2Id");
+                String result = rs.getString("result");
+
+                // Convert N to N/A for frontend display
+                if (result.equals("N")) {
+                    result = "N/A";
+                }
+
+                // Store the match result with player IDs as the key
+                matchResults.put(player1Id + "-" + player2Id, result);
+            }
+
+            rs.close();
+            stmt.close();
+            con.close();
+
+            return matchResults;
+        } catch (SQLException e) {
+            System.err.println("SQL Error: " + e.getMessage());
+            return new HashMap<>();
+        } catch (Exception e) {
+            System.err.println("Error: " + e.getMessage());
+            return new HashMap<>();
         }
     }
 }
