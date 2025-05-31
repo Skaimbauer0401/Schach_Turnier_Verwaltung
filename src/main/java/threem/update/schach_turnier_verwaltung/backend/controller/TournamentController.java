@@ -89,10 +89,14 @@ public class TournamentController {
             // Then delete the tournament
             PreparedStatement pstmt = con.prepareStatement("DELETE FROM tournaments WHERE tournamentId = ?");
             pstmt.setInt(1, tournamentId);
-            int i = pstmt.executeUpdate();
+            pstmt.executeUpdate();
             con.close();
 
-            return String.valueOf(i);
+            PreparedStatement ptsmtmatches = con.prepareStatement("DELETE FROM matches WHERE tournamentId = ?");
+            ptsmtmatches.setInt(1, tournamentId);
+            ptsmtmatches.executeUpdate();
+
+            return "Successfully deleted tournament " + tournamentId;
         } catch (SQLException e) {
             return "SQL Fehler: " + e.getMessage();
         } catch (Exception e) {

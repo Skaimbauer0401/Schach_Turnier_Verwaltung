@@ -32,6 +32,7 @@ public class PersonController {
             url = "jdbc:derby:" + file.getAbsolutePath();
             //Datenbank verbinden und Person mit login credentials auslesen
             Connection con = DriverManager.getConnection(url, user, dbpassword);
+
             PreparedStatement pstmt = con.prepareStatement("select * from persons WHERE username = ? AND password =?");
             pstmt.setString(1, username);
             pstmt.setString(2, password);
@@ -42,6 +43,38 @@ public class PersonController {
             } else {
                 return "Benutzername oder Passwort falsch";
             }
+
+            PreparedStatement pstmtwins = con.prepareStatement("SELECT COUNT(matchid) FROM matches WHERE PLAYER1ID = ? AND RESULT = ?");
+            pstmtwins.setInt(1, person.getId());
+            pstmtwins.setString(2, "W");
+
+            PreparedStatement pstmtlosses = con.prepareStatement("SELECT COUNT(matchid) FROM matches WHERE PLAYER1ID = ? AND RESULT = ?");
+            pstmtlosses.setInt(1, person.getId());
+            pstmtlosses.setString(2, "L");
+
+            PreparedStatement pstmtdraws = con.prepareStatement("SELECT COUNT(matchid) FROM matches WHERE PLAYER1ID = ? AND RESULT = ?");
+            pstmtdraws.setInt(1, person.getId());
+            pstmtdraws.setString(2, "D");
+
+            ResultSet rswins = pstmtwins.executeQuery();
+            ResultSet rslosses = pstmtlosses.executeQuery();
+            ResultSet rsdraws = pstmtdraws.executeQuery();
+
+            rswins.next();
+            rslosses.next();
+            rsdraws.next();
+
+            person.setWins(rswins.getInt(1));
+            person.setLosses(rslosses.getInt(1));
+            person.setDraws(rsdraws.getInt(1));
+
+            PreparedStatement pstmtupdate = con.prepareStatement("UPDATE persons SET wins = ?, losses = ?, draws = ? WHERE personId = ?");
+            pstmtupdate.setInt(1, person.getWins());
+            pstmtupdate.setInt(2, person.getLosses());
+            pstmtupdate.setInt(3, person.getDraws());
+            pstmtupdate.setInt(4, person.getId());
+            pstmtupdate.executeUpdate();
+
 
             //Person zu json String
             ObjectMapper objectMapper = new ObjectMapper();
