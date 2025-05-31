@@ -384,9 +384,24 @@
 
                 tournamentDates.textContent = `From: ${startDate.toLocaleDateString(undefined, dateOptions)} - To: ${endDate.toLocaleDateString(undefined, dateOptions)}`;
 
+                // Create matrix button
+                const matrixButton = document.createElement('button');
+                matrixButton.style.backgroundColor = '#2196F3'; // Blue color
+                matrixButton.style.color = 'white';
+                matrixButton.style.padding = '5px 10px';
+                matrixButton.style.border = 'none';
+                matrixButton.style.borderRadius = '4px';
+                matrixButton.style.cursor = 'pointer';
+                matrixButton.style.marginTop = '10px';
+                matrixButton.textContent = 'Ranking';
+                matrixButton.onclick = function() {
+                    window.location.href = `matrix_table.html?tournamentId=${tournament.tournamentId || tournament.id}&tournamentName=${encodeURIComponent(tournament.name)}`;
+                };
+
                 // Add elements to the tournament item
                 tournamentItem.appendChild(tournamentName);
                 tournamentItem.appendChild(tournamentDates);
+                tournamentItem.appendChild(matrixButton);
 
                 // Add the tournament item to the list
                 tournamentList.appendChild(tournamentItem);

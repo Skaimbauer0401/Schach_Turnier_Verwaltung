@@ -181,7 +181,7 @@
         <h2 id="tournament-title">Tournament: </h2>
 
         <div class="description">
-            This matrix shows match results between players. Editing is disabled in this view.
+            This matrix shows match results between players. Click on a cell to record a win, loss, or draw.
         </div>
 
         <div class="controls">
@@ -206,6 +206,8 @@
 
         <div class="button-container" style="margin-top: 20px; margin-bottom: 20px; display: flex; justify-content: center; gap: 10px;">
             <button onclick="goBack()" style="background-color: #2196F3;">Back to Previous Page</button>
+            <button onclick="resetMatrix()" style="background-color: #FF9800;">Reset Matrix</button>
+            <button onclick="saveMatches()">Save Matches</button>
         </div>
     </div>
 
@@ -229,6 +231,20 @@
             window.history.back();
         }
 
+        // Function to reset the matrix
+        function resetMatrix() {
+            if (confirm('Are you sure you want to reset all match results to N/A?')) {
+                // Create N/A entries for all player combinations
+                players.forEach(player1 => {
+                    players.forEach(player2 => {
+                        if (player1.id !== player2.id) {
+                            matchResults[`${player1.id}-${player2.id}`] = 'N/A';
+                        }
+                    });
+                });
+                updateMatrix();
+            }
+        }
 
         // Function to fetch players for a tournament
         function fetchPlayersFromTournament(tournamentId) {
@@ -311,8 +327,10 @@
                         cell.textContent = '← N/A';
                         cell.classList.add('not-played');
 
-                        // No click event for editing in the normal matrix table
-                        // Editing is disabled
+                        // Add click event to show result selector
+                        cell.addEventListener('click', function() {
+                            showResultSelector(this);
+                        });
                     }
 
                     row.appendChild(cell);
@@ -322,6 +340,49 @@
             });
         }
 
+        // Function to show result selector
+        function showResultSelector(cell) {
+            // Remove any existing result selectors
+            const existingSelectors = document.querySelectorAll('.result-selector');
+            existingSelectors.forEach(selector => selector.remove());
+
+            // Create result selector
+            const selector = document.createElement('div');
+            selector.className = 'result-selector';
+
+            // Add options
+            const options = [
+                { text: 'Win', value: 'W', class: 'win' },
+                { text: 'Loss', value: 'L', class: 'loss' },
+                { text: 'Draw', value: 'D', class: 'draw' },
+                { text: 'N/A', value: 'N/A', class: 'not-played' }
+            ];
+
+            options.forEach(option => {
+                const optionElement = document.createElement('div');
+                optionElement.className = 'result-option';
+                optionElement.textContent = option.text;
+
+                optionElement.addEventListener('click', function() {
+                    setMatchResult(cell, option.value, option.class);
+                    selector.remove();
+                });
+
+                selector.appendChild(optionElement);
+            });
+
+            // Position and show the selector
+            cell.appendChild(selector);
+            selector.style.display = 'block';
+
+            // Close selector when clicking outside
+            document.addEventListener('click', function closeSelector(e) {
+                if (!selector.contains(e.target) && e.target !== cell) {
+                    selector.remove();
+                    document.removeEventListener('click', closeSelector);
+                }
+            });
+        }
 
         // Function to set match result
         function setMatchResult(cell, result, resultClass) {
@@ -460,6 +521,30 @@
                 });
         }
 
+        // Function to save matches
+        function saveMatches() {
+            fetch(`http://localhost:8080/tournaments/addMatches/${tournamentId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(matchResults)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.text();
+            })
+            .then(data => {
+                alert('Match results saved successfully!');
+                console.log('Save response:', data);
+            })
+            .catch(error => {
+                console.error('Error saving match results:', error);
+                alert('Failed to save match results. Please try again later.');
+            });
+        }
 
         // Initialize the page when loaded
         window.onload = function() {

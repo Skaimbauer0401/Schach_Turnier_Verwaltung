@@ -546,6 +546,7 @@
                 // Create edit button
                 const editButton = document.createElement('button');
                 editButton.className = 'edit-btn';
+                editButton.style.backgroundColor = '#ffed58';
                 editButton.textContent = 'Edit Tournament';
                 editButton.onclick = function() {
                     showEditForm(tournament);
@@ -556,9 +557,9 @@
                 matrixButton.className = 'edit-btn';
                 matrixButton.style.backgroundColor = '#2196F3';// Blue color to distinguish it
                 matrixButton.style.marginLeft = '10px';
-                matrixButton.textContent = 'Edit Matrix';
+                matrixButton.textContent = 'Ranking';
                 matrixButton.onclick = function() {
-                    window.location.href = `matrix_table.html?tournamentId=${tournament.tournamentId}&tournamentName=${encodeURIComponent(tournament.name)}`;
+                    window.location.href = `matrix_table_admin.html?tournamentId=${tournament.tournamentId}&tournamentName=${encodeURIComponent(tournament.name)}`;
                 };
 
                 // Create delete button
