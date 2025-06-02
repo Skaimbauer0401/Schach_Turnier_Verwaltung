@@ -286,20 +286,6 @@
                     <div class="person-info">Username: <span id="person-username"></span></div>
                     <div class="person-info">Admin Status: <span id="person-admin"></span></div>
 
-                    <div class="stats-container">
-                        <div class="stat-box">
-                            <div class="stat-value" id="person-wins">0</div>
-                            <div class="stat-label">Wins</div>
-                        </div>
-                        <div class="stat-box">
-                            <div class="stat-value" id="person-losses">0</div>
-                            <div class="stat-label">Losses</div>
-                        </div>
-                        <div class="stat-box">
-                            <div class="stat-value" id="person-draws">0</div>
-                            <div class="stat-label">Draws</div>
-                        </div>
-                    </div>
                 </div>
 
                 <div class="create-tournament-form">
@@ -482,10 +468,6 @@
                 document.getElementById('person-username').textContent = user.username;
                 // Try both field names for admin status
                 document.getElementById('person-admin').textContent = (user.admin !== undefined) ? (user.admin ? 'Yes' : 'No') : 'Unknown';
-                // Try both field names for stats
-                document.getElementById('person-wins').textContent = user.wins || 0;
-                document.getElementById('person-losses').textContent = user.losses || 0;
-                document.getElementById('person-draws').textContent = user.draws || 0;
 
                 // Process tournament data (elements after the first one)
                 const tournaments = dataArray.slice(1);

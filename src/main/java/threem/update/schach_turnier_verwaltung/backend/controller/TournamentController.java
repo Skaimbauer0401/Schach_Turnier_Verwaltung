@@ -81,12 +81,10 @@ public class TournamentController {
         try {
             Connection con = DriverManager.getConnection(url, user, dbpassword);
 
-            // First delete any references in the persons_tournaments table
             PreparedStatement pstmtRefs = con.prepareStatement("DELETE FROM persons_tournaments WHERE tournamentId = ?");
             pstmtRefs.setInt(1, tournamentId);
             pstmtRefs.executeUpdate();
 
-            // Then delete the tournament
             PreparedStatement pstmt = con.prepareStatement("DELETE FROM tournaments WHERE tournamentId = ?");
             pstmt.setInt(1, tournamentId);
             pstmt.executeUpdate();
@@ -112,7 +110,6 @@ public class TournamentController {
         try {
             Connection con = DriverManager.getConnection(url, user, dbpassword);
 
-            // Prepare statements for deleting and inserting matches
             PreparedStatement deleteStmt = con.prepareStatement(
                 "DELETE FROM matches WHERE tournamentId = ? AND player1Id = ? AND player2Id = ?"
             );
@@ -123,12 +120,10 @@ public class TournamentController {
 
             int successCount = 0;
 
-            // Process each match result
             for (Map.Entry<String, String> entry : matchData.entrySet()) {
                 String key = entry.getKey();
                 String result = entry.getValue();
 
-                // Parse the key to get player IDs (format: "player1Id-player2Id")
                 String[] players = key.split("-");
                 if (players.length != 2) {
                     continue; // Skip invalid entries
@@ -138,18 +133,15 @@ public class TournamentController {
                     int player1Id = Integer.parseInt(players[0]);
                     int player2Id = Integer.parseInt(players[1]);
 
-                    // First delete any existing match
                     deleteStmt.setInt(1, tournamentId);
                     deleteStmt.setInt(2, player1Id);
                     deleteStmt.setInt(3, player2Id);
                     deleteStmt.executeUpdate();
 
-                    // Convert N/A to N for database storage
                     if (result.equals("N/A")) {
                         result = "N";
                     }
 
-                    // Then insert the new match
                     insertStmt.setInt(1, tournamentId);
                     insertStmt.setInt(2, player1Id);
                     insertStmt.setInt(3, player2Id);
@@ -157,7 +149,6 @@ public class TournamentController {
 
                     successCount += insertStmt.executeUpdate();
                 } catch (NumberFormatException e) {
-                    // Skip entries with invalid player IDs
                     continue;
                 }
             }
@@ -183,25 +174,21 @@ public class TournamentController {
         try {
             Connection con = DriverManager.getConnection(url, user, dbpassword);
 
-            // Prepare statement to get all matches for this tournament
             PreparedStatement stmt = con.prepareStatement(
                 "SELECT player1Id, player2Id, result FROM matches WHERE tournamentId = ?"
             );
             stmt.setInt(1, tournamentId);
             ResultSet rs = stmt.executeQuery();
 
-            // Process each match result
             while (rs.next()) {
                 int player1Id = rs.getInt("player1Id");
                 int player2Id = rs.getInt("player2Id");
                 String result = rs.getString("result");
 
-                // Convert N to N/A for frontend display
                 if (result.equals("N")) {
                     result = "N/A";
                 }
 
-                // Store the match result with player IDs as the key
                 matchResults.put(player1Id + "-" + player2Id, result);
             }
 
