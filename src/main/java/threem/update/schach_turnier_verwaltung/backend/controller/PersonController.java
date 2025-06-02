@@ -23,14 +23,12 @@ public class PersonController {
     private String dbpassword = "DBAdmin";
 
 
-    //gibt die zugehörige Person mit angemeldeten Tournaments zurück. beim admin alle existierenden tournaments
     @GetMapping("/persons/person/{username}/{password}")
     public String getPerson(@PathVariable String username, @PathVariable String password) {
         try {
-            //Datenbank File finden
+            //Datenbank finden
             File file = new File("DB/database");
             url = "jdbc:derby:" + file.getAbsolutePath();
-            //Datenbank verbinden und Person mit login credentials auslesen
             Connection con = DriverManager.getConnection(url, user, dbpassword);
 
             PreparedStatement pstmt = con.prepareStatement("select * from persons WHERE username = ? AND password =?");
@@ -76,18 +74,15 @@ public class PersonController {
             pstmtupdate.executeUpdate();
 
 
-            //Person zu json String
             ObjectMapper objectMapper = new ObjectMapper();
             String jsonPerson = objectMapper.writeValueAsString(person);
 
             String jsonTournaments = "";
 
-            //wenn die Person Admin ist, werden alle Tournaments geladen, wenn nicht, dann werden die für den Spieler eingetragenen Tournaments geladen
             if (person.isAdmin()) {
                 Statement stmt = con.createStatement();
                 ResultSet rstournaments = stmt.executeQuery("SELECT * FROM tournaments");
                 objectMapper = new ObjectMapper();
-                //Alle Tournaments in json String schreiben
                 while (rstournaments.next()) {
                     Tournament tournament = new Tournament(rstournaments.getInt("tournamentId"), rstournaments.getString("name"), rstournaments.getTimestamp("start_time"), rstournaments.getTimestamp("end_time"));
                     jsonTournaments += "," + objectMapper.writeValueAsString(tournament);
@@ -97,7 +92,6 @@ public class PersonController {
                 ptournstmt.setInt(1, person.getId());
                 ResultSet rstournaments = ptournstmt.executeQuery();
                 objectMapper = new ObjectMapper();
-                //zugewiesene Tournaments in json String schreiben
                 while (rstournaments.next()) {
                     Tournament tournament = new Tournament(rstournaments.getInt("tournamentId"), rstournaments.getString("name"), rstournaments.getTimestamp("start_time"), rstournaments.getTimestamp("end_time"));
                     jsonTournaments += "," + objectMapper.writeValueAsString(tournament);
@@ -128,11 +122,9 @@ public class PersonController {
                 person = new Person(username, password, false, 0, 0, 0);
             }
 
-            //Datenbank File finden
             File file = new File("DB/database");
             url = "jdbc:derby:" + file.getAbsolutePath();
 
-            //Datenbank verbinden und Person hinzufügen, falls nicht bereits vorhanden
             Connection con = DriverManager.getConnection(url, user, dbpassword);
             PreparedStatement personstmt = con.prepareStatement("SELECT COUNT(personId) FROM persons WHERE username = ?");
             personstmt.setString(1, person.getUsername());
@@ -142,7 +134,6 @@ public class PersonController {
                 return "Benutzername bereits vergeben";
             }
 
-            //erstellen der neuen Person
             PreparedStatement pstmt = con.prepareStatement("INSERT INTO persons (username, password, admin, wins, losses, draws) VALUES (?, ?, ?, ?, ?, ?)");
             pstmt.setString(1, person.getUsername());
             pstmt.setString(2, person.getPassword());
@@ -161,13 +152,11 @@ public class PersonController {
         }
     }
 
-    //gibt von allen Personen nur den username an den aufrufer
     @GetMapping("/persons/allpersons")
     public String getAllPersons() throws SQLException, JsonProcessingException {
         File file = new File("DB/database");
         url = "jdbc:derby:" + file.getAbsolutePath();
 
-        //Datenbank verbinden und Person hinzufügen, falls nicht bereits vorhanden
         Connection con = DriverManager.getConnection(url, user, dbpassword);
         Statement stmt = con.createStatement();
         ResultSet rs = stmt.executeQuery("SELECT personid, username FROM persons ORDER BY username ASC");
@@ -191,11 +180,9 @@ public class PersonController {
         File file = new File("DB/database");
         url = "jdbc:derby:" + file.getAbsolutePath();
 
-        //Datenbank verbinden
         try {
             Connection con = DriverManager.getConnection(url, user, dbpassword);
 
-            // First check if the tournament exists
             PreparedStatement checkTournament = con.prepareStatement("SELECT COUNT(*) FROM tournaments WHERE tournamentId = ?");
             checkTournament.setInt(1, tournamentId);
             ResultSet rs = checkTournament.executeQuery();
@@ -207,7 +194,6 @@ public class PersonController {
                 return "Tournament existiert nicht";
             }
 
-            // Check if the person is already registered for this tournament
             PreparedStatement checkDuplicate = con.prepareStatement("SELECT COUNT(*) FROM persons_tournaments WHERE personId = ? AND tournamentId = ?");
             checkDuplicate.setInt(1, personId);
             checkDuplicate.setInt(2, tournamentId);
@@ -239,11 +225,9 @@ public class PersonController {
         File file = new File("DB/database");
         url = "jdbc:derby:" + file.getAbsolutePath();
 
-        //Datenbank verbinden
         try {
             Connection con = DriverManager.getConnection(url, user, dbpassword);
 
-            // First check if the tournament exists
             PreparedStatement result = con.prepareStatement("SELECT * FROM persons_tournaments pt JOIN persons p on pt.personId = p.personId WHERE pt.tournamentId = ?");
             result.setInt(1, tournamentId);
             ResultSet rs = result.executeQuery();
@@ -256,17 +240,14 @@ public class PersonController {
 
             con.close();
 
-            // Check if jsonPersons is empty (no players found)
             if (jsonPersons.isEmpty()) {
                 HttpHeaders headers = new HttpHeaders();
                 headers.setContentType(MediaType.APPLICATION_JSON);
                 return new ResponseEntity<>("[]", headers, HttpStatus.OK);
             }
 
-            // Remove the trailing comma
             jsonPersons = jsonPersons.substring(0, jsonPersons.length() - 1);
 
-            // Set content type to application/json
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             return new ResponseEntity<>("["+jsonPersons+"]", headers, HttpStatus.OK);
