@@ -196,7 +196,6 @@
         <div id="tournaments-card" class="tournaments-card">
             <h2>Your Tournaments</h2>
             <div id="tournament-list" class="tournament-list">
-                <!-- Tournament items will be added here dynamically -->
                 <div class="no-tournaments" id="no-tournaments">
                     You are not participating in any tournaments yet.
                 </div>
@@ -214,27 +213,21 @@
     </div>
 
     <script>
-        // Function to toggle profile picture options dropdown
         function togglePictureOptions() {
             const options = document.getElementById('profile-picture-options');
             options.classList.toggle('show');
         }
 
-        // Function to select a profile picture
         function selectProfilePicture(picturePath) {
-            // Update the profile picture
             const profilePicture = document.getElementById('profile-picture');
             profilePicture.src = picturePath;
 
-            // Hide the options dropdown
             const options = document.getElementById('profile-picture-options');
             options.classList.remove('show');
 
-            // Save the selection to localStorage
             localStorage.setItem('profilePicture', picturePath);
         }
 
-        // Close the dropdown if the user clicks outside of it
         window.onclick = function(event) {
             if (!event.target.matches('.profile-picture')) {
                 const dropdowns = document.getElementsByClassName('profile-picture-options');
@@ -247,9 +240,7 @@
             }
         }
 
-        // Check if user data exists in sessionStorage
         window.onload = function() {
-            // Load saved profile picture if exists
             const savedPicture = localStorage.getItem('profilePicture');
             if (savedPicture) {
                 document.getElementById('profile-picture').src = savedPicture;
@@ -258,16 +249,14 @@
             const userData = sessionStorage.getItem('userData');
 
             if (!userData) {
-                // No user data found, redirect back to login
+                // noch nicht angemeldet zurück zu login
                 window.location.href = 'login.html';
                 return;
             }
 
             try {
-                // Parse the user data - it's an array with user as first element and tournaments as subsequent elements
                 const dataArray = JSON.parse(userData);
 
-                // Debug: Log the data to the console
                 console.log("Data from sessionStorage:", dataArray);
 
                 if (!Array.isArray(dataArray) || dataArray.length === 0) {
@@ -275,30 +264,23 @@
                     return;
                 }
 
-                // First element is the user data
                 const user = dataArray[0];
 
-                // Display the user data
                 document.getElementById('welcome-username').textContent = user.username;
-                // Try both field names for ID
                 document.getElementById('person-id').textContent = user.id || user.personId;
                 document.getElementById('person-username').textContent = user.username;
-                // Try both field names for stats
                 document.getElementById('person-wins').textContent = user.wins || 0;
                 document.getElementById('person-losses').textContent = user.losses || 0;
                 document.getElementById('person-draws').textContent = user.draws || 0;
 
-                // Process tournament data (elements after the first one)
                 const tournaments = dataArray.slice(1);
 
-                // Refresh data from server when page loads
                 refreshTournaments();
             } catch (error) {
                 console.error("Error processing user data:", error);
             }
         };
 
-        // Function to refresh user data
         function refreshTournaments() {
             const userData = sessionStorage.getItem('userData');
             if (!userData) return;
@@ -326,10 +308,8 @@
                     .then(data => {
                         if (data === null) return;
 
-                        // Update session storage
                         sessionStorage.setItem('userData', JSON.stringify(data));
 
-                        // Update displayed tournaments
                         const tournaments = data.slice(1);
                         displayTournaments(tournaments);
                     })
@@ -341,31 +321,23 @@
             }
         }
 
-        // Function to display tournaments
         function displayTournaments(tournaments) {
             const tournamentList = document.getElementById('tournament-list');
             const noTournamentsMessage = document.getElementById('no-tournaments');
 
-            // If there are no tournaments, show the message and return
             if (!tournaments || tournaments.length === 0) {
                 noTournamentsMessage.style.display = 'block';
                 return;
             }
 
-            // Hide the "no tournaments" message
             noTournamentsMessage.style.display = 'none';
 
-            // Clear existing tournament items
-            // First, save the noTournamentsMessage element
             tournamentList.removeChild(noTournamentsMessage);
 
-            // Clear all child elements
             tournamentList.innerHTML = '';
 
-            // Add back the noTournamentsMessage element
             tournamentList.appendChild(noTournamentsMessage);
 
-            // Add each tournament to the list
             tournaments.forEach(tournament => {
                 const tournamentItem = document.createElement('div');
                 tournamentItem.className = 'tournament-item';
@@ -377,16 +349,14 @@
                 const tournamentDates = document.createElement('div');
                 tournamentDates.className = 'tournament-dates';
 
-                // Format dates
                 const startDate = new Date(tournament.start);
                 const endDate = new Date(tournament.end);
                 const dateOptions = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
 
                 tournamentDates.textContent = `From: ${startDate.toLocaleDateString(undefined, dateOptions)} - To: ${endDate.toLocaleDateString(undefined, dateOptions)}`;
 
-                // Create matrix button
                 const matrixButton = document.createElement('button');
-                matrixButton.style.backgroundColor = '#2196F3'; // Blue color
+                matrixButton.style.backgroundColor = '#2196F3';
                 matrixButton.style.color = 'white';
                 matrixButton.style.padding = '5px 10px';
                 matrixButton.style.border = 'none';
@@ -398,22 +368,18 @@
                     window.location.href = `matrix_table.html?tournamentId=${tournament.tournamentId || tournament.id}&tournamentName=${encodeURIComponent(tournament.name)}`;
                 };
 
-                // Add elements to the tournament item
                 tournamentItem.appendChild(tournamentName);
                 tournamentItem.appendChild(tournamentDates);
                 tournamentItem.appendChild(matrixButton);
 
-                // Add the tournament item to the list
                 tournamentList.appendChild(tournamentItem);
             });
         }
 
-        // Function to add person to tournament
         function addToTournament() {
             const tournamentId = document.getElementById('tournament-id').value;
             const messageDiv = document.getElementById('tournament-message');
 
-            // Validate input
             if (!tournamentId || isNaN(tournamentId) || tournamentId <= 0) {
                 messageDiv.textContent = 'Please enter a valid tournament ID';
                 messageDiv.style.display = 'block';
@@ -421,7 +387,6 @@
                 return;
             }
 
-            // Get person ID from session storage
             const userData = sessionStorage.getItem('userData');
             if (!userData) {
                 window.location.href = 'login.html';
@@ -432,7 +397,6 @@
             const user = dataArray[0];
             const personId = user.id || user.personId;
 
-            // Call API to add person to tournament
             fetch(`http://localhost:8080/persons/person/addpersontotournament/${personId}/${tournamentId}`)
                 .then(response => {
                     if (!response.ok) {
@@ -454,10 +418,8 @@
                         messageDiv.textContent = 'Successfully joined the tournament';
                         messageDiv.style.backgroundColor = '#ccffcc';
 
-                        // Clear the input field
                         document.getElementById('tournament-id').value = '';
 
-                        // Refresh tournaments list
                         refreshTournaments();
                     }
                     messageDiv.style.display = 'block';
@@ -470,12 +432,9 @@
                 });
         }
 
-        // Logout function
         function logout() {
-            // Clear the session storage
             sessionStorage.removeItem('userData');
 
-            // Redirect to login page
             window.location.href = 'login.html';
         }
     </script>

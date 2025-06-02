@@ -146,7 +146,6 @@
     </div>
 
     <script>
-        // Register button event listener
         document.getElementById('register-btn').addEventListener('click', function() {
             window.location.href = 'registration.html';
         });
@@ -156,23 +155,18 @@
             const password = document.getElementById('password').value;
             const errorMessage = document.getElementById('error-message');
 
-            // Validate inputs
             if (!username || !password) {
                 errorMessage.textContent = 'Please enter both username and password';
                 errorMessage.style.display = 'block';
                 return;
             }
 
-            // Hide any previous error
             errorMessage.style.display = 'none';
 
-            // Make API call to get person data
 
-            // Show loading message
             errorMessage.textContent = 'Loading data, please wait...';
             errorMessage.style.display = 'block';
 
-            // Disable the button to prevent multiple requests
             const loginBtn = document.getElementById('login-btn');
             loginBtn.disabled = true;
 
@@ -199,21 +193,16 @@
                     }
                 })
                 .then(data => {
-                    // If data is null (login failed), don't proceed
                     if (data === null) {
                         return;
                     }
 
-                    // Hide loading message
                     errorMessage.style.display = 'none';
 
-                    // Process the data
                     console.log("Data received:", data);
 
-                    // Store user data in sessionStorage
                     sessionStorage.setItem('userData', JSON.stringify(data));
 
-                    // Check if user is admin and redirect accordingly
                     if (data[0].admin) {
                         window.location.href = 'dashboard_admin.html';
                     } else {
@@ -221,12 +210,10 @@
                     }
                 })
                 .catch(error => {
-                    // Display error message
                     errorMessage.textContent = `Error: ${error.message}`;
                     errorMessage.style.display = 'block';
                 })
                 .finally(() => {
-                    // Re-enable the button
                     loginBtn.disabled = false;
                 });
         });

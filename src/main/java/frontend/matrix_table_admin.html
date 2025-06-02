@@ -212,13 +212,11 @@
     </div>
 
     <script>
-        // Global variables
         let players = [];
         let matchResults = {};
         let tournamentId = '';
         let tournamentName = '';
 
-        // Function to get URL parameters
         function getUrlParameter(name) {
             name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
             var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
@@ -226,15 +224,12 @@
             return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
         }
 
-        // Function to go back to previous page
         function goBack() {
             window.history.back();
         }
 
-        // Function to reset the matrix
         function resetMatrix() {
             if (confirm('Are you sure you want to reset all match results to N/A?')) {
-                // Create N/A entries for all player combinations
                 players.forEach(player1 => {
                     players.forEach(player2 => {
                         if (player1.id !== player2.id) {
@@ -246,7 +241,6 @@
             }
         }
 
-        // Function to fetch players for a tournament
         function fetchPlayersFromTournament(tournamentId) {
             fetch(`http://localhost:8080/persons/person/getPersonByTournament/${tournamentId}`)
                 .then(response => {
@@ -259,16 +253,13 @@
                     console.log('Fetched players:', data);
                     players = data;
 
-                    // Create a map of player IDs to names for later use
                     const playerIdToName = {};
                     players.forEach(player => {
                         playerIdToName[player.id] = player.username;
                     });
 
-                    // Build the matrix with the players
                     buildMatrix(players);
 
-                    // Fetch match results after building the matrix
                     fetchMatchResults(tournamentId, playerIdToName);
                 })
                 .catch(error => {
@@ -277,14 +268,11 @@
                 });
         }
 
-        // Function to build the matrix table
         function buildMatrix(players) {
             const table = document.getElementById('match-matrix');
 
-            // Clear existing table content
             table.innerHTML = '';
 
-            // Create header row with player names
             const headerRow = document.createElement('tr');
             const cornerCell = document.createElement('th');
             cornerCell.textContent = 'Players';
@@ -298,22 +286,18 @@
 
             table.appendChild(headerRow);
 
-            // Create rows for each player
             players.forEach((rowPlayer, rowIndex) => {
                 const row = document.createElement('tr');
 
-                // Add player name as first cell in the row
                 const nameCell = document.createElement('td');
                 nameCell.textContent = rowPlayer.username + ' (' + rowPlayer.id + ')';
                 nameCell.className = 'player-name';
                 row.appendChild(nameCell);
 
-                // Add match cells for each player
                 players.forEach((colPlayer, colIndex) => {
                     const cell = document.createElement('td');
 
                     if (rowIndex === colIndex) {
-                        // Diagonal cells (player vs themselves) are disabled
                         cell.className = 'match-cell disabled';
                         cell.textContent = 'X';
                     } else {
@@ -323,11 +307,9 @@
                         cell.dataset.rowName = rowPlayer.username;
                         cell.dataset.colName = colPlayer.username;
 
-                        // Initialize with N/A
                         cell.textContent = '← N/A';
                         cell.classList.add('not-played');
 
-                        // Add click event to show result selector
                         cell.addEventListener('click', function() {
                             showResultSelector(this);
                         });
@@ -340,17 +322,13 @@
             });
         }
 
-        // Function to show result selector
         function showResultSelector(cell) {
-            // Remove any existing result selectors
             const existingSelectors = document.querySelectorAll('.result-selector');
             existingSelectors.forEach(selector => selector.remove());
 
-            // Create result selector
             const selector = document.createElement('div');
             selector.className = 'result-selector';
 
-            // Add options
             const options = [
                 { text: 'Win', value: 'W', class: 'win' },
                 { text: 'Loss', value: 'L', class: 'loss' },
@@ -371,11 +349,9 @@
                 selector.appendChild(optionElement);
             });
 
-            // Position and show the selector
             cell.appendChild(selector);
             selector.style.display = 'block';
 
-            // Close selector when clicking outside
             document.addEventListener('click', function closeSelector(e) {
                 if (!selector.contains(e.target) && e.target !== cell) {
                     selector.remove();
@@ -384,69 +360,57 @@
             });
         }
 
-        // Function to set match result
         function setMatchResult(cell, result, resultClass) {
             const rowPlayerId = cell.dataset.row;
             const colPlayerId = cell.dataset.col;
             const rowPlayerName = cell.dataset.rowName;
             const colPlayerName = cell.dataset.colName;
 
-            // Store the result for the clicked cell
             matchResults[`${rowPlayerId}-${colPlayerId}`] = result;
 
-            // Calculate and store the inverse result for the opposite cell
             let inverseResult = '';
             let inverseClass = '';
 
             if (result === 'W') {
-                inverseResult = 'L'; // If player1 won, player2 lost
+                inverseResult = 'L';
                 inverseClass = 'loss';
             } else if (result === 'L') {
-                inverseResult = 'W'; // If player1 lost, player2 won
+                inverseResult = 'W';
                 inverseClass = 'win';
             } else if (result === 'D') {
-                inverseResult = 'D'; // If it was a draw, it's still a draw
+                inverseResult = 'D';
                 inverseClass = 'draw';
             } else if (result === 'N/A') {
-                inverseResult = 'N/A'; // Not played is the same for both players
+                inverseResult = 'N/A';
                 inverseClass = 'not-played';
             }
 
-            // Store the inverse result
             if (inverseResult) {
                 matchResults[`${colPlayerId}-${rowPlayerId}`] = inverseResult;
 
-                // Find and update the inverse cell
                 const inverseCell = document.querySelector(`.match-cell[data-row="${colPlayerId}"][data-col="${rowPlayerId}"]`);
                 if (inverseCell) {
                     updateCellDisplay(inverseCell, inverseResult, inverseClass);
                 }
             }
 
-            // Update the clicked cell display
             updateCellDisplay(cell, result, resultClass);
         }
 
-        // Function to update cell display
         function updateCellDisplay(cell, result, resultClass) {
-            // Clear existing content
             cell.textContent = '';
             cell.classList.remove('win', 'loss', 'draw', 'not-played');
 
-            // Add the result text with the appropriate class
             cell.textContent = `← ${result}`;
             cell.classList.add(resultClass);
         }
 
-        // Function to update the entire matrix with current results
         function updateMatrix() {
-            // Clear all cells first and set default N/A
             const cells = document.querySelectorAll('.match-cell:not(.disabled)');
             cells.forEach(cell => {
                 updateCellDisplay(cell, 'N/A', 'not-played');
             });
 
-            // Update cells with current match results
             for (const [key, result] of Object.entries(matchResults)) {
                 const [rowPlayerId, colPlayerId] = key.split('-');
                 const cell = document.querySelector(`.match-cell[data-row="${rowPlayerId}"][data-col="${colPlayerId}"]`);
@@ -463,9 +427,7 @@
             }
         }
 
-        // Function to fetch match results from the tournament API
         function fetchMatchResults(tournamentId, playerIdToName) {
-            // Initialize all possible matches with N/A values
             matchResults = {};
             players.forEach(player1 => {
                 players.forEach(player2 => {
@@ -483,45 +445,36 @@
                     return response.json();
                 })
                 .then(data => {
-                    // Process each match result
                     for (const [key, result] of Object.entries(data)) {
-                        // Parse the key to get player IDs (format: "player1Id-player2Id")
                         const [player1Id, player2Id] = key.split('-');
 
-                        // Store the original match result
                         matchResults[key] = result;
 
-                        // Store the inverse match result for the opposite cell
                         let inverseResult = '';
                         if (result === 'W') {
-                            inverseResult = 'L'; // If player1 won, player2 lost
+                            inverseResult = 'L';
                         } else if (result === 'L') {
-                            inverseResult = 'W'; // If player1 lost, player2 won
+                            inverseResult = 'W';
                         } else if (result === 'D') {
-                            inverseResult = 'D'; // If it was a draw, it's still a draw
+                            inverseResult = 'D';
                         } else if (result === 'N/A') {
-                            inverseResult = 'N/A'; // Not played is the same for both players
+                            inverseResult = 'N/A';
                         }
 
-                        // Only add the inverse result if we have a valid result
                         if (inverseResult) {
                             matchResults[`${player2Id}-${player1Id}`] = inverseResult;
                         }
                     }
 
-                    // Update the matrix with the match results
                     updateMatrix();
                 })
                 .catch(error => {
                     console.error('Error fetching match results:', error);
-                    // Don't show an alert for this error, as it's not critical
                     console.log('Failed to load match results. The matrix will be empty.');
-                    // Still update the matrix to show N/A for all cells
                     updateMatrix();
                 });
         }
 
-        // Function to save matches
         function saveMatches() {
             fetch(`http://localhost:8080/tournaments/addMatches/${tournamentId}`, {
                 method: 'POST',
@@ -546,16 +499,12 @@
             });
         }
 
-        // Initialize the page when loaded
         window.onload = function() {
-            // Get tournament information from URL parameters
             tournamentId = getUrlParameter('tournamentId');
             tournamentName = getUrlParameter('tournamentName');
 
-            // Display tournament name
             document.getElementById('tournament-title').textContent = 'Tournament: ' + tournamentName;
 
-            // Fetch players for the tournament
             if (tournamentId) {
                 fetchPlayersFromTournament(tournamentId);
             } else {

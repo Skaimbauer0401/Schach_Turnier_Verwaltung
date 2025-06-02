@@ -173,7 +173,7 @@
         .edit-tournament-form {
             margin-top: 20px;
             padding: 15px;
-            background-color: #fffde7; /* Soft yellow tone */
+            background-color: #fffde7;
             border-radius: 5px;
             border-left: 5px solid #FFC107;
         }
@@ -369,27 +369,21 @@
     </div>
 
     <script>
-        // Function to toggle profile picture options dropdown
         function togglePictureOptions() {
             const options = document.getElementById('profile-picture-options');
             options.classList.toggle('show');
         }
 
-        // Function to select a profile picture
         function selectProfilePicture(picturePath) {
-            // Update the profile picture
             const profilePicture = document.getElementById('profile-picture');
             profilePicture.src = picturePath;
 
-            // Hide the options dropdown
             const options = document.getElementById('profile-picture-options');
             options.classList.remove('show');
 
-            // Save the selection to localStorage
             localStorage.setItem('profilePicture', picturePath);
         }
 
-        // Close the dropdown if the user clicks outside of it
         window.onclick = function(event) {
             if (!event.target.matches('.profile-picture')) {
                 const dropdowns = document.getElementsByClassName('profile-picture-options');
@@ -402,23 +396,18 @@
             }
         }
 
-        // Function to set default values for date and time inputs
         function setDefaultDateTimeValues() {
             const now = new Date();
 
-            // Format date as YYYY-MM-DD for date inputs
             const dateString = now.toISOString().split('T')[0];
 
-            // Format time as HH:MM for time inputs
             const hours = String(now.getHours()).padStart(2, '0');
             const minutes = String(now.getMinutes()).padStart(2, '0');
             const timeString = `${hours}:${minutes}`;
 
-            // Set default values for start date/time (current date/time)
             document.getElementById('start-date').value = dateString;
             document.getElementById('start-time').value = timeString;
 
-            // Set default values for end date/time (current date/time + 1 day)
             const tomorrow = new Date(now);
             tomorrow.setDate(tomorrow.getDate() + 1);
             const tomorrowDateString = tomorrow.toISOString().split('T')[0];
@@ -427,9 +416,7 @@
             document.getElementById('end-time').value = timeString;
         }
 
-        // Check if user data exists in sessionStorage
         window.onload = function() {
-            // Load saved profile picture if exists
             const savedPicture = localStorage.getItem('profilePicture');
             if (savedPicture) {
                 document.getElementById('profile-picture').src = savedPicture;
@@ -438,19 +425,15 @@
             const userData = sessionStorage.getItem('userData');
 
             if (!userData) {
-                // No user data found, redirect back to login
                 window.location.href = 'login.html';
                 return;
             }
 
-            // Set default values for date and time inputs
             setDefaultDateTimeValues();
 
             try {
-                // Parse the user data - it's an array with user as first element and tournaments as subsequent elements
                 const dataArray = JSON.parse(userData);
 
-                // Debug: Log the data to the console
                 console.log("Data from sessionStorage:", dataArray);
 
                 if (!Array.isArray(dataArray) || dataArray.length === 0) {
@@ -458,55 +441,40 @@
                     return;
                 }
 
-                // First element is the user data
                 const user = dataArray[0];
 
-                // Display the user data
                 document.getElementById('welcome-username').textContent = user.username;
-                // Try both field names for ID
                 document.getElementById('person-id').textContent = user.id || user.personId;
                 document.getElementById('person-username').textContent = user.username;
-                // Try both field names for admin status
                 document.getElementById('person-admin').textContent = (user.admin !== undefined) ? (user.admin ? 'Yes' : 'No') : 'Unknown';
 
-                // Process tournament data (elements after the first one)
                 const tournaments = dataArray.slice(1);
 
-                // Don't display tournaments from sessionStorage, we'll get them from the server
-                // displayTournaments(tournaments);
 
-                // Refresh data from server when page loads
                 refreshUserData();
             } catch (error) {
                 console.error("Error processing user data:", error);
             }
         };
 
-        // Function to display tournaments
         function displayTournaments(tournaments) {
             const tournamentList = document.getElementById('tournament-list');
             const noTournamentsMessage = document.getElementById('no-tournaments');
 
-            // If there are no tournaments, show the message and return
             if (!tournaments || tournaments.length === 0) {
                 noTournamentsMessage.style.display = 'block';
                 return;
             }
 
-            // Hide the "no tournaments" message
             noTournamentsMessage.style.display = 'none';
 
-            // Clear existing tournament items
-            // First, save the noTournamentsMessage element
+
             tournamentList.removeChild(noTournamentsMessage);
 
-            // Clear all child elements
             tournamentList.innerHTML = '';
 
-            // Add back the noTournamentsMessage element
             tournamentList.appendChild(noTournamentsMessage);
 
-            // Add each tournament to the list
             tournaments.forEach(tournament => {
                 const tournamentItem = document.createElement('div');
                 tournamentItem.className = 'tournament-item';
@@ -518,14 +486,12 @@
                 const tournamentDates = document.createElement('div');
                 tournamentDates.className = 'tournament-dates';
 
-                // Format dates
                 const startDate = new Date(tournament.start);
                 const endDate = new Date(tournament.end);
                 const dateOptions = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
 
                 tournamentDates.textContent = `From: ${startDate.toLocaleDateString(undefined, dateOptions)} - To: ${endDate.toLocaleDateString(undefined, dateOptions)}`;
 
-                // Create edit button
                 const editButton = document.createElement('button');
                 editButton.className = 'edit-btn';
                 editButton.style.backgroundColor = '#fec007';
@@ -534,17 +500,15 @@
                     showEditForm(tournament);
                 };
 
-                // Create matrix button
                 const matrixButton = document.createElement('button');
                 matrixButton.className = 'edit-btn';
-                matrixButton.style.backgroundColor = '#2196F3';// Blue color to distinguish it
+                matrixButton.style.backgroundColor = '#2196F3';
                 matrixButton.style.marginLeft = '10px';
                 matrixButton.textContent = 'Ranking';
                 matrixButton.onclick = function() {
                     window.location.href = `matrix_table_admin.html?tournamentId=${tournament.tournamentId}&tournamentName=${encodeURIComponent(tournament.name)}`;
                 };
 
-                // Create delete button
                 const deleteButton = document.createElement('button');
                 deleteButton.className = 'delete-btn';
                 deleteButton.textContent = 'Delete Tournament';
@@ -554,19 +518,16 @@
                     }
                 };
 
-                // Add elements to the tournament item
                 tournamentItem.appendChild(tournamentName);
                 tournamentItem.appendChild(tournamentDates);
                 tournamentItem.appendChild(editButton);
                 tournamentItem.appendChild(matrixButton);
                 tournamentItem.appendChild(deleteButton);
 
-                // Add the tournament item to the list
                 tournamentList.appendChild(tournamentItem);
             });
         }
 
-        // Function to create a new tournament
         function createTournament() {
             const tournamentName = document.getElementById('tournament-name').value;
             const startDate = document.getElementById('start-date').value;
@@ -576,22 +537,18 @@
             const successMessage = document.getElementById('success-message');
             const errorMessage = document.getElementById('error-message');
 
-            // Hide any previous messages
             successMessage.style.display = 'none';
             errorMessage.style.display = 'none';
 
-            // Validate inputs
             if (!tournamentName || !startDate || !startTime || !endDate || !endTime) {
                 errorMessage.textContent = 'Please fill in all fields';
                 errorMessage.style.display = 'block';
                 return;
             }
 
-            // Format dates for the API
             const formattedStartTime = `${startDate} ${startTime}:00`;
             const formattedEndTime = `${endDate} ${endTime}:00`;
 
-            // Validate date format
             const dateRegex = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/;
             if (!dateRegex.test(formattedStartTime) || !dateRegex.test(formattedEndTime)) {
                 errorMessage.textContent = 'Invalid date or time format';
@@ -599,7 +556,6 @@
                 return;
             }
 
-            // Make API call to create tournament
             fetch(`http://localhost:8080/tournaments/newtournament/${encodeURIComponent(tournamentName)}/${encodeURIComponent(formattedStartTime)}/${encodeURIComponent(formattedEndTime)}`)
                 .then(response => {
                     if (!response.ok) {
@@ -610,27 +566,22 @@
                 .then(result => {
                     console.log("Tournament creation result:", result);
 
-                    // Show success message
                     successMessage.style.display = 'block';
 
-                    // Clear form fields
                     document.getElementById('tournament-name').value = '';
                     document.getElementById('start-date').value = '';
                     document.getElementById('start-time').value = '';
                     document.getElementById('end-date').value = '';
                     document.getElementById('end-time').value = '';
 
-                    // Refresh user data to show the new tournament
                     refreshUserData();
                 })
                 .catch(error => {
-                    // Display error message
                     errorMessage.textContent = `Error: ${error.message}`;
                     errorMessage.style.display = 'block';
                 });
         }
 
-        // Function to refresh user data
         function refreshUserData() {
             const userData = sessionStorage.getItem('userData');
             if (!userData) return;
@@ -639,7 +590,6 @@
                 const dataArray = JSON.parse(userData);
                 const user = dataArray[0];
 
-                // Fetch updated data
                 fetch(`http://localhost:8080/persons/person/${user.username}/${user.password}`)
                     .then(response => {
                         if (!response.ok) {
@@ -658,10 +608,8 @@
                     .then(data => {
                         if (data === null) return;
 
-                        // Update session storage
                         sessionStorage.setItem('userData', JSON.stringify(data));
 
-                        // Update displayed tournaments
                         const tournaments = data.slice(1);
                         displayTournaments(tournaments);
                     })
@@ -673,7 +621,6 @@
             }
         }
         function showEditForm(tournament) {
-            // Get the form elements
             const editForm = document.getElementById('edit-tournament-form');
             const editTournamentId = document.getElementById('edit-tournament-id');
             const editTournamentName = document.getElementById('edit-tournament-name');
@@ -682,39 +629,30 @@
             const editEndDate = document.getElementById('edit-end-date');
             const editEndTime = document.getElementById('edit-end-time');
 
-            // Hide any previous messages
             document.getElementById('edit-success-message').style.display = 'none';
             document.getElementById('edit-error-message').style.display = 'none';
 
-            // Set the tournament ID
             editTournamentId.value = tournament.tournamentId;
 
-            // Set the tournament name
             editTournamentName.value = tournament.name;
 
-            // Format and set the start date and time
             const startDate = new Date(tournament.start);
             editStartDate.value = startDate.toISOString().split('T')[0];
             editStartTime.value = `${String(startDate.getHours()).padStart(2, '0')}:${String(startDate.getMinutes()).padStart(2, '0')}`;
 
-            // Format and set the end date and time
             const endDate = new Date(tournament.end);
             editEndDate.value = endDate.toISOString().split('T')[0];
             editEndTime.value = `${String(endDate.getHours()).padStart(2, '0')}:${String(endDate.getMinutes()).padStart(2, '0')}`;
 
-            // Show the edit form
             editForm.style.display = 'block';
 
-            // Scroll to the edit form
             editForm.scrollIntoView({ behavior: 'smooth' });
         }
 
-        // Function to cancel editing and hide the form
         function cancelEdit() {
             document.getElementById('edit-tournament-form').style.display = 'none';
         }
 
-        // Function to update a tournament
         function updateTournament() {
             const tournamentId = document.getElementById('edit-tournament-id').value;
             const tournamentName = document.getElementById('edit-tournament-name').value;
@@ -725,22 +663,18 @@
             const successMessage = document.getElementById('edit-success-message');
             const errorMessage = document.getElementById('edit-error-message');
 
-            // Hide any previous messages
             successMessage.style.display = 'none';
             errorMessage.style.display = 'none';
 
-            // Validate inputs
             if (!tournamentName || !startDate || !startTime || !endDate || !endTime) {
                 errorMessage.textContent = 'Please fill in all fields';
                 errorMessage.style.display = 'block';
                 return;
             }
 
-            // Convert dates to timestamps
             const startTimestamp = new Date(`${startDate}T${startTime}`).getTime();
             const endTimestamp = new Date(`${endDate}T${endTime}`).getTime();
 
-            // Make API call to update tournament
             fetch(`http://localhost:8080/tournaments/tournament/alter/${tournamentId}/${encodeURIComponent(tournamentName)}/${startTimestamp}/${endTimestamp}`)
                 .then(response => {
                     if (!response.ok) {
@@ -751,43 +685,34 @@
                 .then(result => {
                     console.log("Tournament update result:", result);
 
-                    // Show success message
                     successMessage.style.display = 'block';
 
-                    // Refresh user data to show the updated tournament
                     refreshUserData();
 
-                    // Hide the edit form after a short delay
                     setTimeout(() => {
                         document.getElementById('edit-tournament-form').style.display = 'none';
                     }, 2000);
                 })
                 .catch(error => {
-                    // Display error message
                     errorMessage.textContent = `Error: ${error.message}`;
                     errorMessage.style.display = 'block';
                 });
         }
 
 
-        // Function to delete a tournament
         function deleteTournament(tournamentId) {
-            // Immediately remove the tournament from the UI
             const tournamentItems = document.querySelectorAll('.tournament-item');
             tournamentItems.forEach(item => {
-                // Check if this item contains the tournament ID we're deleting
                 if (item.querySelector('.tournament-name').textContent.includes(`ID: ${tournamentId}`)) {
                     item.remove();
                 }
             });
 
-            // Check if there are no tournaments left and show the "no tournaments" message if needed
             const remainingTournaments = document.querySelectorAll('.tournament-item');
             if (remainingTournaments.length === 0) {
                 document.getElementById('no-tournaments').style.display = 'block';
             }
 
-            // Make API call to delete tournament
             fetch(`http://localhost:8080/tournaments/tournament/delete/${tournamentId}`)
                 .then(response => {
                     if (!response.ok) {
@@ -798,34 +723,29 @@
                 .then(result => {
                     console.log("Tournament deletion result:", result);
 
-                    // Show a temporary success message
                     const tempMessage = document.createElement('div');
                     tempMessage.className = 'success-message';
                     tempMessage.style.display = 'block';
                     tempMessage.textContent = 'Tournament deleted successfully!';
                     document.getElementById('tournaments-card').appendChild(tempMessage);
 
-                    // Remove the message after 3 seconds
                     setTimeout(() => {
                         if (tempMessage.parentNode) {
                             tempMessage.parentNode.removeChild(tempMessage);
                         }
                     }, 3000);
 
-                    // Refresh user data to update the tournament list
                     refreshUserData();
                 })
                 .catch(error => {
                     console.error("Error deleting tournament:", error);
 
-                    // Show a temporary error message
                     const tempMessage = document.createElement('div');
                     tempMessage.className = 'error-message';
                     tempMessage.style.display = 'block';
                     tempMessage.textContent = `Error deleting tournament: ${error.message}`;
                     document.getElementById('tournaments-card').appendChild(tempMessage);
 
-                    // Remove the message after 3 seconds
                     setTimeout(() => {
                         if (tempMessage.parentNode) {
                             tempMessage.parentNode.removeChild(tempMessage);
@@ -834,12 +754,9 @@
                 });
         }
 
-        // Logout function
         function logout() {
-            // Clear the session storage
             sessionStorage.removeItem('userData');
 
-            // Redirect to login page
             window.location.href = 'login.html';
         }
     </script>
