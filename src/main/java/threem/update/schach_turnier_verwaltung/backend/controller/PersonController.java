@@ -38,13 +38,18 @@ public class PersonController {
             ResultSet rsPerson = pstmt.executeQuery();
             Person person;
 
-            boolean login = true;
-
-            if (rsPerson.next() && login) {
+            boolean login = false;
+            while(rsPerson.next()){
                 person = new Person(rsPerson.getInt("personId"), rsPerson.getString("username"), rsPerson.getString("password"), rsPerson.getBoolean("admin"), rsPerson.getInt("wins"), rsPerson.getInt("losses"), rsPerson.getInt("draws"));
                 UserService userService = new UserService();
-                login = userService.isPasswordMatch(password, rsPerson.getString("password"));
-            } else {
+
+                login = userService.isPasswordMatch(password, rsPerson.getString("password")) && username == person.getUsername();
+                if(login){
+                    break;
+                }
+
+            }
+            if(!login){
                 return "Benutzername oder Passwort falsch";
             }
 
