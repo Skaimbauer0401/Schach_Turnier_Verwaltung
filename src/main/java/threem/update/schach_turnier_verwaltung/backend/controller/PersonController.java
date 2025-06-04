@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import threem.update.schach_turnier_verwaltung.backend.data.Person;
 import threem.update.schach_turnier_verwaltung.backend.data.Tournament;
+import threem.update.schach_turnier_verwaltung.backend.data.UserService;
 
 import java.io.File;
 import java.sql.*;
@@ -36,8 +37,13 @@ public class PersonController {
             pstmt.setString(2, password);
             ResultSet rsPerson = pstmt.executeQuery();
             Person person;
-            if (rsPerson.next()) {
+
+            boolean login = true;
+
+            if (rsPerson.next() && login) {
                 person = new Person(rsPerson.getInt("personId"), rsPerson.getString("username"), rsPerson.getString("password"), rsPerson.getBoolean("admin"), rsPerson.getInt("wins"), rsPerson.getInt("losses"), rsPerson.getInt("draws"));
+                UserService userService = new UserService();
+                login = userService.isPasswordMatch(password, rsPerson.getString("password"));
             } else {
                 return "Benutzername oder Passwort falsch";
             }
@@ -136,7 +142,8 @@ public class PersonController {
 
             PreparedStatement pstmt = con.prepareStatement("INSERT INTO persons (username, password, admin, wins, losses, draws) VALUES (?, ?, ?, ?, ?, ?)");
             pstmt.setString(1, person.getUsername());
-            pstmt.setString(2, person.getPassword());
+            UserService userService = new UserService();
+            pstmt.setString(2, userService.registerUser(person.getPassword()));
             pstmt.setBoolean(3, person.isAdmin());
             pstmt.setInt(4, person.getWins());
             pstmt.setInt(5, person.getLosses());
