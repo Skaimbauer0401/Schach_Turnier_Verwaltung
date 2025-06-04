@@ -1,0 +1,38 @@
+package threem.update.schach_turnier_verwaltung.backend.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.web.SecurityFilterChain;
+
+@Configuration
+@EnableWebSecurity
+public class SecurityConfig {
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+            .csrf(csrf -> csrf.disable())  // Disable CSRF for simplicity in this application
+            .cors(cors -> cors.configure(http))  // Use CORS configuration from SchachTurnierVerwaltungApp
+            .authorizeHttpRequests(auth -> auth
+                // Person controller endpoints
+                .requestMatchers("/persons/person/**").permitAll()  // Allow login endpoint
+                .requestMatchers("/persons/newperson/**").permitAll()  // Allow registration endpoint
+                .requestMatchers("/persons/allpersons").permitAll()  // Allow access to all persons
+                .requestMatchers("/persons/person/addpersontotournament/**").permitAll()  // Allow tournament registration
+                .requestMatchers("/persons/person/getPersonByTournament/**").permitAll()  // Allow tournament player listing
+
+                // Tournament controller endpoints
+                .requestMatchers("/tournaments/newtournament/**").permitAll()  // Allow tournament creation
+                .requestMatchers("/tournaments/tournament/alter/**").permitAll()  // Allow tournament modification
+                .requestMatchers("/tournaments/tournament/delete/**").permitAll()  // Allow tournament deletion
+                .requestMatchers("/tournaments/addMatches/**").permitAll()  // Allow adding match results
+                .requestMatchers("/tournaments/getMatches/**").permitAll()  // Allow retrieving match results
+
+                .anyRequest().permitAll()  // For now, allow all other requests too
+            );
+
+        return http.build();
+    }
+}

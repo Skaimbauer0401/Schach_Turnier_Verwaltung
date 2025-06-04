@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import threem.update.schach_turnier_verwaltung.backend.data.Person;
 import threem.update.schach_turnier_verwaltung.backend.data.Tournament;
-import threem.update.schach_turnier_verwaltung.backend.data.UserService;
+import threem.update.schach_turnier_verwaltung.backend.services.EncodeService;
 
 import java.io.File;
 import java.sql.*;
@@ -32,18 +32,17 @@ public class PersonController {
             url = "jdbc:derby:" + file.getAbsolutePath();
             Connection con = DriverManager.getConnection(url, user, dbpassword);
 
-            PreparedStatement pstmt = con.prepareStatement("select * from persons WHERE username = ? AND password =?");
-            pstmt.setString(1, username);
-            pstmt.setString(2, password);
+            PreparedStatement pstmt = con.prepareStatement("select * from persons");
             ResultSet rsPerson = pstmt.executeQuery();
-            Person person;
+            Person person = null;
 
             boolean login = false;
-            while(rsPerson.next()){
-                person = new Person(rsPerson.getInt("personId"), rsPerson.getString("username"), rsPerson.getString("password"), rsPerson.getBoolean("admin"), rsPerson.getInt("wins"), rsPerson.getInt("losses"), rsPerson.getInt("draws"));
-                UserService userService = new UserService();
 
-                login = userService.isPasswordMatch(password, rsPerson.getString("password")) && username == person.getUsername();
+            while(rsPerson.next() && !login){
+                person = new Person(rsPerson.getInt("personId"), rsPerson.getString("username"), rsPerson.getString("password"), rsPerson.getBoolean("admin"), rsPerson.getInt("wins"), rsPerson.getInt("losses"), rsPerson.getInt("draws"));
+                EncodeService encodeService = new EncodeService();
+                boolean temp = encodeService.isPasswordMatch(password, rsPerson.getString("password"));
+                login = temp && username.equals(person.getUsername());
                 if(login){
                     break;
                 }
@@ -147,8 +146,9 @@ public class PersonController {
 
             PreparedStatement pstmt = con.prepareStatement("INSERT INTO persons (username, password, admin, wins, losses, draws) VALUES (?, ?, ?, ?, ?, ?)");
             pstmt.setString(1, person.getUsername());
-            UserService userService = new UserService();
-            pstmt.setString(2, userService.registerUser(person.getPassword()));
+            EncodeService encodeService = new EncodeService();
+            System.out.println(encodeService.registerUser(password));
+            pstmt.setString(2, encodeService.registerUser(person.getPassword()));
             pstmt.setBoolean(3, person.isAdmin());
             pstmt.setInt(4, person.getWins());
             pstmt.setInt(5, person.getLosses());

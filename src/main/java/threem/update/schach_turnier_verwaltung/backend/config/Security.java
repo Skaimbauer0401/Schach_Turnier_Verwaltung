@@ -1,4 +1,4 @@
-package threem.update.schach_turnier_verwaltung.backend.data;
+package threem.update.schach_turnier_verwaltung.backend.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
