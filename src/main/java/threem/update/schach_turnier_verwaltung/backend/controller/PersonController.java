@@ -19,10 +19,6 @@ import java.sql.*;
 @RestController
 public class PersonController {
 
-    private String url;
-    private String user;
-    private String dbpassword;
-
     @GetMapping("/persons/person/{username}/{password}")
     public String getPerson(@PathVariable String username, @PathVariable String password) {
         try {
@@ -247,18 +243,15 @@ public class PersonController {
         try {
             BufferedReader br = new BufferedReader(new FileReader("src/main/java/threem/update/schach_turnier_verwaltung/backend/database_important/database_connection"));
             String line = br.readLine();
-            url = line.split(";")[1];
+            String url = line.split(";")[1];
             line = br.readLine();
-            user = line.split(";")[1];
+            String username = line.split(";")[1];
             line = br.readLine();
-            dbpassword = line.split(";")[1];
+            String dbpassword = line.split(";")[1];
             br.close();
 
-            return DriverManager.getConnection(url,user,dbpassword);
-        } catch (SQLException | FileNotFoundException e) {
-            System.out.println("DB Connection failed");
-            return null;
-        } catch (IOException e) {
+            return DriverManager.getConnection(url,username,dbpassword);
+        } catch (SQLException | IOException e) {
             System.out.println("DB Connection failed");
             return null;
         }
