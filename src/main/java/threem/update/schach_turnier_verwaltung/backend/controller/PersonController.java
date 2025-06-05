@@ -84,43 +84,39 @@ public class PersonController {
             pstmtupdate.executeUpdate();
 
 
-            ObjectMapper objectMapper = new ObjectMapper();
-            String jsonPerson = objectMapper.writeValueAsString(person);
+            String jsonPerson = toJson(person);
 
             String jsonTournaments = "";
 
             if (person.isAdmin()) {
                 Statement stmt = con.createStatement();
                 ResultSet rstournaments = stmt.executeQuery("SELECT * FROM tournaments");
-                objectMapper = new ObjectMapper();
                 while (rstournaments.next()) {
                     Tournament tournament = new Tournament(rstournaments.getInt("tournamentId"), rstournaments.getString("name"), rstournaments.getTimestamp("start_time"), rstournaments.getTimestamp("end_time"));
-                    jsonTournaments += "," + objectMapper.writeValueAsString(tournament);
+                    jsonTournaments += "," + toJson(tournament);
                 }
             } else {
                 PreparedStatement ptournstmt = con.prepareStatement("SELECT DISTINCT t.* FROM PERSONS_TOURNAMENTS pt JOIN TOURNAMENTS t ON pt.TOURNAMENTID = t.TOURNAMENTID WHERE pt.personID = ?");
                 ptournstmt.setInt(1, person.getId());
                 ResultSet rstournaments = ptournstmt.executeQuery();
-                objectMapper = new ObjectMapper();
                 while (rstournaments.next()) {
                     Tournament tournament = new Tournament(rstournaments.getInt("tournamentId"), rstournaments.getString("name"), rstournaments.getTimestamp("start_time"), rstournaments.getTimestamp("end_time"));
-                    jsonTournaments += "," + objectMapper.writeValueAsString(tournament);
+                    jsonTournaments += "," + toJson(tournament);
                 }
             }
 
             rsPerson.close();
             con.close();
 
-
             return "[" + jsonPerson + jsonTournaments + "]";
         } catch (SQLException e) {
             return "SQL Fehler";
-        } catch (JsonProcessingException e) {
-            return "Json konvertierung fehlgeschlagen";
         } catch (Exception e) {
             return "Unbekannter Fehler";
         }
     }
+
+
 
     @GetMapping("/persons/newperson/{username}/{password}/{adminkey}")
     public String newPerson(@PathVariable String username, @PathVariable String password, @PathVariable String adminkey) {
@@ -173,14 +169,12 @@ public class PersonController {
         Statement stmt = con.createStatement();
         ResultSet rs = stmt.executeQuery("SELECT personid, username FROM persons ORDER BY username ASC");
 
-        ObjectMapper objectMapper;
         String jsonPerson = "";
 
         while (rs.next()) {
             Person person = new Person(rs.getInt("personid"), rs.getString("username"), "nene das tust du nicht", false, 0, 0, 0);
 
-            objectMapper = new ObjectMapper();
-            jsonPerson += objectMapper.writeValueAsString(person);
+            jsonPerson += toJson(person);
         }
         con.close();
 
@@ -246,8 +240,7 @@ public class PersonController {
             String jsonPersons = "";
             while(rs.next()){
                 Person person = new Person(rs.getInt("personId"), rs.getString("username"), "nene das tust du nicht", false, 0, 0, 0);
-                ObjectMapper objectMapper = new ObjectMapper();
-                jsonPersons += objectMapper.writeValueAsString(person)+",";
+                jsonPersons += toJson(person) + ",";
             }
 
             con.close();
@@ -268,6 +261,16 @@ public class PersonController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("SQL Fehler");
         } catch (JsonProcessingException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("JSON Fehler");
+        }
+    }
+
+
+    public String toJson(Object object) throws JsonProcessingException {
+        try{
+            ObjectMapper objectMapper = new ObjectMapper();
+            return objectMapper.writeValueAsString(object);
+        }catch(Exception e){
+            return "Json konvertierung fehlgeschlagen";
         }
     }
 }
