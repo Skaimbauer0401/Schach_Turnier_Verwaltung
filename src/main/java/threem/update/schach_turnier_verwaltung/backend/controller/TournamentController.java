@@ -1,5 +1,7 @@
 package threem.update.schach_turnier_verwaltung.backend.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -7,6 +9,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import threem.update.schach_turnier_verwaltung.backend.data.Tournament;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,10 +23,6 @@ import java.text.SimpleDateFormat;
 
 @RestController
 public class TournamentController {
-
-    private String url;
-    private String user = "DBAdmin";
-    private String dbpassword = "DBAdmin";
 
     @GetMapping("/tournaments/newtournament/{tournament_name}/{start_time}/{end_time}")
     public String newTournament(@PathVariable String tournament_name, @PathVariable String start_time, @PathVariable String end_time) throws ParseException {
@@ -35,11 +36,8 @@ public class TournamentController {
 
         Tournament tournament = new Tournament(1, "Tournament", start, end);
 
-        File file = new File("DB/database");
-        url = "jdbc:derby:" + file.getAbsolutePath();
-
         try {
-            Connection con = DriverManager.getConnection(url, user, dbpassword);
+            Connection con = databaseConnection();
             PreparedStatement pstmt = con.prepareStatement("INSERT INTO tournaments (name, start_time, end_time) VALUES (?, ?, ?)");
             pstmt.setString(1, tournament_name);
             pstmt.setTimestamp(2, start);
@@ -54,10 +52,8 @@ public class TournamentController {
 
     @GetMapping("/tournaments/tournament/alter/{tournamentId}/{name}/{start_time}/{end_time}")
     public String alterTournament(@PathVariable int tournamentId, @PathVariable String name, @PathVariable long start_time, @PathVariable long end_time) {
-        File file = new File("DB/database");
-        url = "jdbc:derby:" + file.getAbsolutePath();
         try {
-            Connection con = DriverManager.getConnection(url, user, dbpassword);
+            Connection con = databaseConnection();
             PreparedStatement pstmt = con.prepareStatement("UPDATE tournaments SET name = ?, start_time = ?, end_time = ? WHERE tournamentId = ?");
             pstmt.setString(1, name);
             pstmt.setTimestamp(2, new Timestamp(start_time));
@@ -76,10 +72,9 @@ public class TournamentController {
 
     @GetMapping("/tournaments/tournament/delete/{tournamentId}")
     public String deleteTournament(@PathVariable int tournamentId) {
-        File file = new File("DB/database");
-        url = "jdbc:derby:" + file.getAbsolutePath();
+
         try {
-            Connection con = DriverManager.getConnection(url, user, dbpassword);
+            Connection con = databaseConnection();
 
             PreparedStatement pstmtRefs = con.prepareStatement("DELETE FROM persons_tournaments WHERE tournamentId = ?");
             pstmtRefs.setInt(1, tournamentId);
@@ -104,11 +99,9 @@ public class TournamentController {
 
     @PostMapping("/tournaments/addMatches/{tournamentId}")
     public String addMatches(@PathVariable int tournamentId, @RequestBody Map<String, String> matchData) {
-        File file = new File("DB/database");
-        url = "jdbc:derby:" + file.getAbsolutePath();
 
         try {
-            Connection con = DriverManager.getConnection(url, user, dbpassword);
+            Connection con = databaseConnection();
 
             PreparedStatement deleteStmt = con.prepareStatement(
                 "DELETE FROM matches WHERE tournamentId = ? AND player1Id = ? AND player2Id = ?"
@@ -126,7 +119,7 @@ public class TournamentController {
 
                 String[] players = key.split("-");
                 if (players.length != 2) {
-                    continue; // Skip invalid entries
+                    continue;
                 }
 
                 try {
@@ -167,12 +160,11 @@ public class TournamentController {
 
     @GetMapping("/tournaments/getMatches/{tournamentId}")
     public Map<String, String> getMatches(@PathVariable int tournamentId) {
-        File file = new File("DB/database");
-        url = "jdbc:derby:" + file.getAbsolutePath();
+
         Map<String, String> matchResults = new HashMap<>();
 
         try {
-            Connection con = DriverManager.getConnection(url, user, dbpassword);
+            Connection con = databaseConnection();
 
             PreparedStatement stmt = con.prepareStatement(
                 "SELECT player1Id, player2Id, result FROM matches WHERE tournamentId = ?"
@@ -203,6 +195,24 @@ public class TournamentController {
         } catch (Exception e) {
             System.err.println("Error: " + e.getMessage());
             return new HashMap<>();
+        }
+    }
+
+    public Connection databaseConnection(){
+        try {
+            BufferedReader br = new BufferedReader(new FileReader("src/main/java/threem/update/schach_turnier_verwaltung/backend/database_important/database_connection"));
+            String line = br.readLine();
+            String url = line.split(";")[1];
+            line = br.readLine();
+            String username = line.split(";")[1];
+            line = br.readLine();
+            String dbpassword = line.split(";")[1];
+            br.close();
+
+            return DriverManager.getConnection(url,username,dbpassword);
+        } catch (SQLException | IOException e) {
+            System.out.println("DB Connection failed");
+            return null;
         }
     }
 }
