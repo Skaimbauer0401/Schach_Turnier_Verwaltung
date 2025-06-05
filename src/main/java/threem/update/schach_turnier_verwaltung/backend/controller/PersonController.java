@@ -13,7 +13,7 @@ import threem.update.schach_turnier_verwaltung.backend.data.Person;
 import threem.update.schach_turnier_verwaltung.backend.data.Tournament;
 import threem.update.schach_turnier_verwaltung.backend.services.EncodeService;
 
-import java.io.File;
+import java.io.*;
 import java.sql.*;
 
 @RestController
@@ -24,13 +24,13 @@ public class PersonController {
     private String dbpassword = "DBAdmin";
 
 
+
+
     @GetMapping("/persons/person/{username}/{password}")
     public String getPerson(@PathVariable String username, @PathVariable String password) {
         try {
-            //Datenbank finden
-            File file = new File("DB/database");
-            url = "jdbc:derby:" + file.getAbsolutePath();
-            Connection con = DriverManager.getConnection(url, user, dbpassword);
+
+            Connection con = databaseConnection();
 
             PreparedStatement pstmt = con.prepareStatement("select * from persons");
             ResultSet rsPerson = pstmt.executeQuery();
@@ -128,10 +128,9 @@ public class PersonController {
                 person = new Person(username, password, false, 0, 0, 0);
             }
 
-            File file = new File("DB/database");
-            url = "jdbc:derby:" + file.getAbsolutePath();
 
-            Connection con = DriverManager.getConnection(url, user, dbpassword);
+            Connection con = databaseConnection();
+
             PreparedStatement personstmt = con.prepareStatement("SELECT COUNT(personId) FROM persons WHERE username = ?");
             personstmt.setString(1, person.getUsername());
             ResultSet rs = personstmt.executeQuery();
@@ -162,10 +161,8 @@ public class PersonController {
 
     @GetMapping("/persons/allpersons")
     public String getAllPersons() throws SQLException, JsonProcessingException {
-        File file = new File("DB/database");
-        url = "jdbc:derby:" + file.getAbsolutePath();
 
-        Connection con = DriverManager.getConnection(url, user, dbpassword);
+        Connection con = databaseConnection();
         Statement stmt = con.createStatement();
         ResultSet rs = stmt.executeQuery("SELECT personid, username FROM persons ORDER BY username ASC");
 
@@ -183,11 +180,10 @@ public class PersonController {
 
     @GetMapping("/persons/person/addpersontotournament/{personId}/{tournamentId}")
     public String addPersontoTournament(@PathVariable int personId, @PathVariable int tournamentId) {
-        File file = new File("DB/database");
-        url = "jdbc:derby:" + file.getAbsolutePath();
+
 
         try {
-            Connection con = DriverManager.getConnection(url, user, dbpassword);
+            Connection con = databaseConnection();
 
             PreparedStatement checkTournament = con.prepareStatement("SELECT COUNT(*) FROM tournaments WHERE tournamentId = ?");
             checkTournament.setInt(1, tournamentId);
@@ -228,11 +224,9 @@ public class PersonController {
 
     @GetMapping("/persons/person/getPersonByTournament/{tournamentId}")
     public ResponseEntity<?> getPersonsByTournament(@PathVariable int tournamentId) {
-        File file = new File("DB/database");
-        url = "jdbc:derby:" + file.getAbsolutePath();
 
         try {
-            Connection con = DriverManager.getConnection(url, user, dbpassword);
+            Connection con = databaseConnection();
 
             PreparedStatement result = con.prepareStatement("SELECT * FROM persons_tournaments pt JOIN persons p on pt.personId = p.personId WHERE pt.tournamentId = ?");
             result.setInt(1, tournamentId);
@@ -271,6 +265,27 @@ public class PersonController {
             return objectMapper.writeValueAsString(object);
         }catch(Exception e){
             return "Json konvertierung fehlgeschlagen";
+        }
+    }
+
+    public Connection databaseConnection(){
+        try {
+            BufferedReader br = new BufferedReader(new FileReader("threem/update/schach_turnier_verwaltung/backend/database_important/database_connection"));
+            String line = br.readLine();
+            url = line.split(";")[1];
+            line = br.readLine();
+            user = line.split(";")[1];
+            line = br.readLine();
+            dbpassword = line.split(";")[1];
+            br.close();
+
+            return DriverManager.getConnection(url,user,dbpassword);
+        } catch (SQLException | FileNotFoundException e) {
+            System.out.println("DB Connection failed");
+            return null;
+        } catch (IOException e) {
+            System.out.println("DB Connection failed");
+            return null;
         }
     }
 }
