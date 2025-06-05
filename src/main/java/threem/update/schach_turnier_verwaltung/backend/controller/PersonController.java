@@ -20,11 +20,8 @@ import java.sql.*;
 public class PersonController {
 
     private String url;
-    private String user = "DBAdmin";
-    private String dbpassword = "DBAdmin";
-
-
-
+    private String user;
+    private String dbpassword;
 
     @GetMapping("/persons/person/{username}/{password}")
     public String getPerson(@PathVariable String username, @PathVariable String password) {
@@ -116,8 +113,6 @@ public class PersonController {
         }
     }
 
-
-
     @GetMapping("/persons/newperson/{username}/{password}/{adminkey}")
     public String newPerson(@PathVariable String username, @PathVariable String password, @PathVariable String adminkey) {
         Person person;
@@ -157,25 +152,6 @@ public class PersonController {
         } catch (Exception e) {
             return "Unbekannter Fehler";
         }
-    }
-
-    @GetMapping("/persons/allpersons")
-    public String getAllPersons() throws SQLException, JsonProcessingException {
-
-        Connection con = databaseConnection();
-        Statement stmt = con.createStatement();
-        ResultSet rs = stmt.executeQuery("SELECT personid, username FROM persons ORDER BY username ASC");
-
-        String jsonPerson = "";
-
-        while (rs.next()) {
-            Person person = new Person(rs.getInt("personid"), rs.getString("username"), "nene das tust du nicht", false, 0, 0, 0);
-
-            jsonPerson += toJson(person);
-        }
-        con.close();
-
-        return jsonPerson;
     }
 
     @GetMapping("/persons/person/addpersontotournament/{personId}/{tournamentId}")
@@ -220,7 +196,6 @@ public class PersonController {
             return "SQL Fehler";
         }
     }
-
 
     @GetMapping("/persons/person/getPersonByTournament/{tournamentId}")
     public ResponseEntity<?> getPersonsByTournament(@PathVariable int tournamentId) {
