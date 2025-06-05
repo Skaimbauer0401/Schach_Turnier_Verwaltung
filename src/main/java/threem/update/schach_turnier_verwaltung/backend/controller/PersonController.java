@@ -270,7 +270,7 @@ public class PersonController {
 
     public Connection databaseConnection(){
         try {
-            BufferedReader br = new BufferedReader(new FileReader("threem/update/schach_turnier_verwaltung/backend/database_important/database_connection"));
+            BufferedReader br = new BufferedReader(new FileReader("src/main/java/threem/update/schach_turnier_verwaltung/backend/database_important/database_connection"));
             String line = br.readLine();
             url = line.split(";")[1];
             line = br.readLine();
