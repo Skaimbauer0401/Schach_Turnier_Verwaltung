@@ -21,6 +21,7 @@ target/
 
 ### Database ###
 DB/
+derby.log
 
 ### NetBeans ###
 /nbproject/private/
