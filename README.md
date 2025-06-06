@@ -1,5 +1,5 @@
 
-# Schach-Turnier-Verwaltung (Chess Tournament Management System)
+# Chess Tournament Management System
 
 ## Project Overview
 This application is a comprehensive Chess Tournament Management System designed to facilitate the organization and management of chess tournaments. It provides a platform for both administrators and players to interact with tournament data, track match results, and manage player statistics.
@@ -48,7 +48,7 @@ This application is a comprehensive Chess Tournament Management System designed 
 ### Prerequisites
 - Java Development Kit (JDK)
 - Maven or Gradle for dependency management
-- Derby database
+- Database
 
 ### Installation
 1. Clone the repository
@@ -70,7 +70,4 @@ This application is a comprehensive Chess Tournament Management System designed 
 - Integration with chess federation databases
 
 ## Contributors
-- threem.update team
-
-## License
-[Specify your license information here]
+- Samuel Bauer & Sebastian Schönleitner
