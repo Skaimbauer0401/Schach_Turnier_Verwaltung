@@ -104,11 +104,11 @@ public class TournamentController {
             Connection con = databaseConnection();
 
             PreparedStatement deleteStmt = con.prepareStatement(
-                "DELETE FROM matches WHERE tournamentId = ? AND player1Id = ? AND player2Id = ?"
+                    "DELETE FROM matches WHERE tournamentId = ? AND player1Id = ? AND player2Id = ?"
             );
 
             PreparedStatement insertStmt = con.prepareStatement(
-                "INSERT INTO matches (tournamentId, player1Id, player2Id, result) VALUES (?, ?, ?, ?)"
+                    "INSERT INTO matches (tournamentId, player1Id, player2Id, result) VALUES (?, ?, ?, ?)"
             );
 
             int successCount = 0;
@@ -167,7 +167,7 @@ public class TournamentController {
             Connection con = databaseConnection();
 
             PreparedStatement stmt = con.prepareStatement(
-                "SELECT player1Id, player2Id, result FROM matches WHERE tournamentId = ?"
+                    "SELECT player1Id, player2Id, result FROM matches WHERE tournamentId = ?"
             );
             stmt.setInt(1, tournamentId);
             ResultSet rs = stmt.executeQuery();
@@ -198,7 +198,7 @@ public class TournamentController {
         }
     }
 
-    public Connection databaseConnection(){
+    public Connection databaseConnection() {
         try {
             BufferedReader br = new BufferedReader(new FileReader("src/main/java/threem/update/schach_turnier_verwaltung/backend/database_important/database_connection"));
             String line = br.readLine();
@@ -209,7 +209,7 @@ public class TournamentController {
             String dbpassword = line.split(";")[1];
             br.close();
 
-            return DriverManager.getConnection(url,username,dbpassword);
+            return DriverManager.getConnection(url, username, dbpassword);
         } catch (SQLException | IOException e) {
             System.out.println("DB Connection failed");
             return null;
