@@ -15,17 +15,11 @@ public class EncodeService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    // Default constructor for direct instantiation
-    public EncodeService() {
-        // Create a default BCryptPasswordEncoder when autowiring is not available
-        this.passwordEncoder = new BCryptPasswordEncoder();
-    }
+    public EncodeService() {this.passwordEncoder = new BCryptPasswordEncoder();}
 
     public String registerUser(String rawPassword){
         return passwordEncoder.encode(rawPassword);
     }
 
-    public boolean isPasswordMatch(String rawPassword, String encodedPassword){
-        return passwordEncoder.matches(rawPassword, encodedPassword);
-    }
+    public boolean isPasswordMatch(String rawPassword, String encodedPassword){return passwordEncoder.matches(rawPassword, encodedPassword);}
 }

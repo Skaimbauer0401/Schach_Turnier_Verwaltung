@@ -514,7 +514,7 @@
                 const dataArray = JSON.parse(userData);
                 const user = dataArray[0];
 
-                fetch(`http://localhost:8080/persons/person/${user.username}/${user.password}`)
+                fetch(`http://localhost:8080/persons/getperson/${user.username}/${user.password}`)
                     .then(response => {
                         if (!response.ok) {
                             throw new Error(`Server responded with status: ${response.status}`);
@@ -599,7 +599,7 @@
             const startTimestamp = new Date(`${startDate}T${startTime}`).getTime();
             const endTimestamp = new Date(`${endDate}T${endTime}`).getTime();
 
-            fetch(`http://localhost:8080/tournaments/tournament/alter/${tournamentId}/${encodeURIComponent(tournamentName)}/${startTimestamp}/${endTimestamp}`)
+            fetch(`http://localhost:8080/tournaments/altertournament/${tournamentId}/${encodeURIComponent(tournamentName)}/${startTimestamp}/${endTimestamp}`)
                 .then(response => {
                     if (!response.ok) {
                         throw new Error(`Server responded with status: ${response.status}`);
@@ -637,7 +637,7 @@
                 document.getElementById('no-tournaments').style.display = 'block';
             }
 
-            fetch(`http://localhost:8080/tournaments/tournament/delete/${tournamentId}`)
+            fetch(`http://localhost:8080/tournaments/deletetournament/${tournamentId}`)
                 .then(response => {
                     if (!response.ok) {
                         throw new Error(`Server responded with status: ${response.status}`);

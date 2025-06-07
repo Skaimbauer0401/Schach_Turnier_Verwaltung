@@ -228,7 +228,7 @@
 
 
         function fetchPlayersFromTournament(tournamentId) {
-            fetch(`http://localhost:8080/persons/person/getPersonByTournament/${tournamentId}`)
+            fetch(`http://localhost:8080/persons/getPersonByTournament/${tournamentId}`)
                 .then(response => {
                     if (!response.ok) {
                         throw new Error('Network response was not ok');
@@ -383,7 +383,7 @@
                 });
             });
 
-            fetch(`http://localhost:8080/tournaments/getMatches/${tournamentId}`)
+            fetch(`http://localhost:8080/matches/getmatches/${tournamentId}`)
                 .then(response => {
                     if (!response.ok) {
                         throw new Error('Network response was not ok');

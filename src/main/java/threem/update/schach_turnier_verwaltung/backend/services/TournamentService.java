@@ -165,9 +165,6 @@ public class TournamentService {
         }
     }
 
-
-
-
     public String toJson(Object object) throws JsonProcessingException {
         try{
             ObjectMapper objectMapper = new ObjectMapper();

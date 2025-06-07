@@ -22,9 +22,7 @@ public class Tournament {
         return tournamentId;
     }
 
-    public void setTournamentId(int tournamentId) {
-        this.tournamentId = tournamentId;
-    }
+    public void setTournamentId(int tournamentId) {this.tournamentId = tournamentId;}
 
     public String getName() {
         return name;

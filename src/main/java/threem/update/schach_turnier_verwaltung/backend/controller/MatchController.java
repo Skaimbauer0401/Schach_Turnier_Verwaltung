@@ -14,16 +14,15 @@ public class MatchController {
 
     private MatchService matchService;
 
-    @PostMapping("/tournaments/addMatches/{tournamentId}")
+    @PostMapping("/matches/addmatches/{tournamentId}")
     public String addMatches(@PathVariable int tournamentId, @RequestBody Map<String, String> matchData) {
         matchService = new MatchService();
         return matchService.addMatches(tournamentId, matchData);
     }
 
-    @GetMapping("/tournaments/getMatches/{tournamentId}")
+    @GetMapping("/matches/getmatches/{tournamentId}")
     public Map<String, String> getMatches(@PathVariable int tournamentId) {
         matchService = new MatchService();
         return matchService.getMatches(tournamentId);
-
     }
 }

@@ -35,13 +35,13 @@ public class TournamentController {
         return tournamentService.newTournament(tournament_name, start_time, end_time);
     }
 
-    @GetMapping("/tournaments/tournament/alter/{tournamentId}/{name}/{start_time}/{end_time}")
+    @GetMapping("/tournaments/altertournament/{tournamentId}/{name}/{start_time}/{end_time}")
     public String alterTournament(@PathVariable int tournamentId, @PathVariable String name, @PathVariable long start_time, @PathVariable long end_time) {
         tournamentService = new TournamentService();
         return tournamentService.alterTournament(tournamentId, name, start_time, end_time);
     }
 
-    @GetMapping("/tournaments/tournament/delete/{tournamentId}")
+    @GetMapping("/tournaments/deletetournament/{tournamentId}")
     public String deleteTournament(@PathVariable int tournamentId) {
         tournamentService = new TournamentService();
         return tournamentService.deleteTournament(tournamentId);

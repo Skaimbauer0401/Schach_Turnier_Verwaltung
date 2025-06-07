@@ -24,7 +24,7 @@ public class PersonController {
     private PersonService personService;
     private TournamentService tournamentService;
 
-    @GetMapping("/persons/person/{username}/{password}")
+    @GetMapping("/persons/getperson/${username}/{password}")
     public String getPerson(@PathVariable String username, @PathVariable String password) {
         personService = new PersonService();
         return personService.getPerson(username, password);
@@ -36,13 +36,13 @@ public class PersonController {
         return personService.newPerson(username, password, adminkey);
     }
 
-    @GetMapping("/persons/person/addpersontotournament/{personId}/{tournamentId}")
+    @GetMapping("/persons/addpersontotournament/{personId}/{tournamentId}")
     public String addPersontoTournament(@PathVariable int personId, @PathVariable int tournamentId) {
         tournamentService = new TournamentService();
         return tournamentService.addPersonToTournament(personId, tournamentId);
     }
 
-    @GetMapping("/persons/person/getPersonByTournament/{tournamentId}")
+    @GetMapping("/persons/getPersonByTournament/{tournamentId}")
     public ResponseEntity<?> getPersonsByTournament(@PathVariable int tournamentId) {
         tournamentService = new TournamentService();
         return tournamentService.getPersonsByTournament(tournamentId);

@@ -170,7 +170,7 @@
             const loginBtn = document.getElementById('login-btn');
             loginBtn.disabled = true;
 
-            let fetchString = `http://localhost:8080/persons/person/${username}/${password}`;
+            let fetchString = `http://localhost:8080/persons/getperson/${username}/${password}`;
 
             fetch(fetchString)
                 .then(response => {
