@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 import threem.update.schach_turnier_verwaltung.backend.data.Person;
 import threem.update.schach_turnier_verwaltung.backend.data.Tournament;
 import threem.update.schach_turnier_verwaltung.backend.services.EncodeService;
+import threem.update.schach_turnier_verwaltung.backend.services.PersonService;
+import threem.update.schach_turnier_verwaltung.backend.services.TournamentService;
 
 import java.io.*;
 import java.sql.*;
@@ -19,241 +21,30 @@ import java.sql.*;
 @RestController
 public class PersonController {
 
+    private PersonService personService;
+    private TournamentService tournamentService;
+
     @GetMapping("/persons/person/{username}/{password}")
     public String getPerson(@PathVariable String username, @PathVariable String password) {
-        try {
-
-            Connection con = databaseConnection();
-
-            PreparedStatement pstmt = con.prepareStatement("select * from persons");
-            ResultSet rsPerson = pstmt.executeQuery();
-            Person person = null;
-
-            boolean login = false;
-
-            while(rsPerson.next() && !login){
-                person = new Person(rsPerson.getInt("personId"), rsPerson.getString("username"), rsPerson.getString("password"), rsPerson.getBoolean("admin"), rsPerson.getInt("wins"), rsPerson.getInt("losses"), rsPerson.getInt("draws"));
-                EncodeService encodeService = new EncodeService();
-                boolean temp = encodeService.isPasswordMatch(password, rsPerson.getString("password"));
-                login = temp && username.equals(person.getUsername());
-                if(login){
-                    break;
-                }
-
-            }
-            if(!login){
-                return "Benutzername oder Passwort falsch";
-            }
-
-            PreparedStatement pstmtwins = con.prepareStatement("SELECT COUNT(matchid) FROM matches WHERE PLAYER1ID = ? AND RESULT = ?");
-            pstmtwins.setInt(1, person.getId());
-            pstmtwins.setString(2, "W");
-
-            PreparedStatement pstmtlosses = con.prepareStatement("SELECT COUNT(matchid) FROM matches WHERE PLAYER1ID = ? AND RESULT = ?");
-            pstmtlosses.setInt(1, person.getId());
-            pstmtlosses.setString(2, "L");
-
-            PreparedStatement pstmtdraws = con.prepareStatement("SELECT COUNT(matchid) FROM matches WHERE PLAYER1ID = ? AND RESULT = ?");
-            pstmtdraws.setInt(1, person.getId());
-            pstmtdraws.setString(2, "D");
-
-            ResultSet rswins = pstmtwins.executeQuery();
-            ResultSet rslosses = pstmtlosses.executeQuery();
-            ResultSet rsdraws = pstmtdraws.executeQuery();
-
-            rswins.next();
-            rslosses.next();
-            rsdraws.next();
-
-            person.setWins(rswins.getInt(1));
-            person.setLosses(rslosses.getInt(1));
-            person.setDraws(rsdraws.getInt(1));
-
-            PreparedStatement pstmtupdate = con.prepareStatement("UPDATE persons SET wins = ?, losses = ?, draws = ? WHERE personId = ?");
-            pstmtupdate.setInt(1, person.getWins());
-            pstmtupdate.setInt(2, person.getLosses());
-            pstmtupdate.setInt(3, person.getDraws());
-            pstmtupdate.setInt(4, person.getId());
-            pstmtupdate.executeUpdate();
-
-
-            String jsonPerson = toJson(person);
-
-            String jsonTournaments = "";
-
-            if (person.isAdmin()) {
-                Statement stmt = con.createStatement();
-                ResultSet rstournaments = stmt.executeQuery("SELECT * FROM tournaments");
-                while (rstournaments.next()) {
-                    Tournament tournament = new Tournament(rstournaments.getInt("tournamentId"), rstournaments.getString("name"), rstournaments.getTimestamp("start_time"), rstournaments.getTimestamp("end_time"));
-                    jsonTournaments += "," + toJson(tournament);
-                }
-            } else {
-                PreparedStatement ptournstmt = con.prepareStatement("SELECT DISTINCT t.* FROM PERSONS_TOURNAMENTS pt JOIN TOURNAMENTS t ON pt.TOURNAMENTID = t.TOURNAMENTID WHERE pt.personID = ?");
-                ptournstmt.setInt(1, person.getId());
-                ResultSet rstournaments = ptournstmt.executeQuery();
-                while (rstournaments.next()) {
-                    Tournament tournament = new Tournament(rstournaments.getInt("tournamentId"), rstournaments.getString("name"), rstournaments.getTimestamp("start_time"), rstournaments.getTimestamp("end_time"));
-                    jsonTournaments += "," + toJson(tournament);
-                }
-            }
-
-            rsPerson.close();
-            con.close();
-
-            return "[" + jsonPerson + jsonTournaments + "]";
-        } catch (SQLException e) {
-            return "SQL Fehler";
-        } catch (Exception e) {
-            return "Unbekannter Fehler";
-        }
+        personService = new PersonService();
+        return personService.getPerson(username, password);
     }
 
     @GetMapping("/persons/newperson/{username}/{password}/{adminkey}")
     public String newPerson(@PathVariable String username, @PathVariable String password, @PathVariable String adminkey) {
-        Person person;
-        try {
-            if (adminkey.equals("adminkey")) {
-                person = new Person(username, password, true, 0, 0, 0);
-            } else {
-                person = new Person(username, password, false, 0, 0, 0);
-            }
-
-
-            Connection con = databaseConnection();
-
-            PreparedStatement personstmt = con.prepareStatement("SELECT COUNT(personId) FROM persons WHERE username = ?");
-            personstmt.setString(1, person.getUsername());
-            ResultSet rs = personstmt.executeQuery();
-            rs.next();
-            if (rs.getInt(1) >= 1) {
-                return "Benutzername bereits vergeben";
-            }
-
-            PreparedStatement pstmt = con.prepareStatement("INSERT INTO persons (username, password, admin, wins, losses, draws) VALUES (?, ?, ?, ?, ?, ?)");
-            pstmt.setString(1, person.getUsername());
-            EncodeService encodeService = new EncodeService();
-            System.out.println(encodeService.registerUser(password));
-            pstmt.setString(2, encodeService.registerUser(person.getPassword()));
-            pstmt.setBoolean(3, person.isAdmin());
-            pstmt.setInt(4, person.getWins());
-            pstmt.setInt(5, person.getLosses());
-            pstmt.setInt(6, person.getDraws());
-            int result = pstmt.executeUpdate();
-            con.close();
-
-            return String.valueOf(result);
-        } catch (SQLException e) {
-            return "SQL Fehler";
-        } catch (Exception e) {
-            return "Unbekannter Fehler";
-        }
+        PersonService personService = new PersonService();
+        return personService.newPerson(username, password, adminkey);
     }
 
     @GetMapping("/persons/person/addpersontotournament/{personId}/{tournamentId}")
     public String addPersontoTournament(@PathVariable int personId, @PathVariable int tournamentId) {
-
-
-        try {
-            Connection con = databaseConnection();
-
-            PreparedStatement checkTournament = con.prepareStatement("SELECT COUNT(*) FROM tournaments WHERE tournamentId = ?");
-            checkTournament.setInt(1, tournamentId);
-            ResultSet rs = checkTournament.executeQuery();
-            rs.next();
-            int count = rs.getInt(1);
-
-            if (count == 0) {
-                con.close();
-                return "Tournament existiert nicht";
-            }
-
-            PreparedStatement checkDuplicate = con.prepareStatement("SELECT COUNT(*) FROM persons_tournaments WHERE personId = ? AND tournamentId = ?");
-            checkDuplicate.setInt(1, personId);
-            checkDuplicate.setInt(2, tournamentId);
-            ResultSet duplicateRs = checkDuplicate.executeQuery();
-            duplicateRs.next();
-            int duplicateCount = duplicateRs.getInt(1);
-
-            if (duplicateCount > 0) {
-                con.close();
-                return "Spieler ist bereits für dieses Tournament registriert";
-            }
-
-            PreparedStatement pstmt = con.prepareStatement("INSERT INTO persons_tournaments (personID, tournamentID) VALUES (?, ?)");
-            pstmt.setInt(1, personId);
-            pstmt.setInt(2, tournamentId);
-            int i = pstmt.executeUpdate();
-            con.close();
-
-            return String.valueOf(i);
-
-        } catch (SQLException e) {
-            return "SQL Fehler";
-        }
+        tournamentService = new TournamentService();
+        return tournamentService.addPersonToTournament(personId, tournamentId);
     }
 
     @GetMapping("/persons/person/getPersonByTournament/{tournamentId}")
     public ResponseEntity<?> getPersonsByTournament(@PathVariable int tournamentId) {
-
-        try {
-            Connection con = databaseConnection();
-
-            PreparedStatement result = con.prepareStatement("SELECT * FROM persons_tournaments pt JOIN persons p on pt.personId = p.personId WHERE pt.tournamentId = ?");
-            result.setInt(1, tournamentId);
-            ResultSet rs = result.executeQuery();
-            String jsonPersons = "";
-            while(rs.next()){
-                Person person = new Person(rs.getInt("personId"), rs.getString("username"), "nene das tust du nicht", false, 0, 0, 0);
-                jsonPersons += toJson(person) + ",";
-            }
-
-            con.close();
-
-            if (jsonPersons.isEmpty()) {
-                HttpHeaders headers = new HttpHeaders();
-                headers.setContentType(MediaType.APPLICATION_JSON);
-                return new ResponseEntity<>("[]", headers, HttpStatus.OK);
-            }
-
-            jsonPersons = jsonPersons.substring(0, jsonPersons.length() - 1);
-
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            return new ResponseEntity<>("["+jsonPersons+"]", headers, HttpStatus.OK);
-
-        } catch (SQLException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("SQL Fehler");
-        } catch (JsonProcessingException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("JSON Fehler");
-        }
-    }
-
-
-    public String toJson(Object object) throws JsonProcessingException {
-        try{
-            ObjectMapper objectMapper = new ObjectMapper();
-            return objectMapper.writeValueAsString(object);
-        }catch(Exception e){
-            return "Json konvertierung fehlgeschlagen";
-        }
-    }
-
-    public Connection databaseConnection(){
-        try {
-            BufferedReader br = new BufferedReader(new FileReader("src/main/java/threem/update/schach_turnier_verwaltung/backend/database_important/database_connection"));
-            String line = br.readLine();
-            String url = line.split(";")[1];
-            line = br.readLine();
-            String username = line.split(";")[1];
-            line = br.readLine();
-            String dbpassword = line.split(";")[1];
-            br.close();
-
-            return DriverManager.getConnection(url,username,dbpassword);
-        } catch (SQLException | IOException e) {
-            System.out.println("DB Connection failed");
-            return null;
-        }
+        tournamentService = new TournamentService();
+        return tournamentService.getPersonsByTournament(tournamentId);
     }
 }
