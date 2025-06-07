@@ -62,12 +62,5 @@ This application is a comprehensive Chess Tournament Management System designed 
 3. Regular users can join tournaments and view their statistics
 4. Administrators can create, edit, and manage tournaments
 
-## Future Enhancements
-- Advanced tournament formats (Swiss, Round Robin, etc.)
-- ELO rating system implementation
-- Real-time notifications
-- Mobile application
-- Integration with chess federation databases
-
 ## Contributors
 - Samuel Bauer & Sebastian Schönleitner
