@@ -28,7 +28,7 @@ public class SecurityConfig {
                 .requestMatchers("/tournaments/altertournament/**").permitAll()  // Allow tournament modification
                 .requestMatchers("/tournaments/deletetournament/**").permitAll()  // Allow tournament deletion
                 .requestMatchers("/matches/addmatches/**").permitAll()  // Allow adding match results
-                .requestMatchers("/matches/getmatches//**").permitAll()  // Allow retrieving match results
+                .requestMatchers("/matches/getmatches/**").permitAll()  // Allow retrieving match results
 
                 .anyRequest().permitAll()  // For now, allow all other requests too
             );
