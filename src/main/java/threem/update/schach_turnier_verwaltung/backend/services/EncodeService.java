@@ -18,8 +18,10 @@ public class EncodeService {
     public EncodeService() {this.passwordEncoder = new BCryptPasswordEncoder();}
 
     public String registerUser(String rawPassword){
-        return passwordEncoder.encode(rawPassword);
+        return passwordEncoder.encode(rawPassword).replace("/", "_");
     }
 
-    public boolean isPasswordMatch(String rawPassword, String encodedPassword){return passwordEncoder.matches(rawPassword, encodedPassword);}
+    public boolean isPasswordMatch(String rawPassword, String encodedPassword){
+        return passwordEncoder.matches(rawPassword, encodedPassword.replace("_", "/"));
+    }
 }

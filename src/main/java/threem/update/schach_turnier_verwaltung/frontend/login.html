@@ -170,9 +170,7 @@
             const loginBtn = document.getElementById('login-btn');
             loginBtn.disabled = true;
 
-            let fetchString = `http://localhost:8080/persons/getperson/${username}/${password}`;
-
-            fetch(fetchString)
+            fetch(`http://localhost:8080/persons/getperson/${username}/${password}`)
                 .then(response => {
                     if (!response.ok) {
                         throw new Error(`Server responded with status: ${response.status}`);

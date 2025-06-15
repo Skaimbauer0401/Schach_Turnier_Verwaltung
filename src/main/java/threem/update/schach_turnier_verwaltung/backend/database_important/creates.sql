@@ -1,4 +1,3 @@
-
 CREATE TABLE persons (personId INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY, username varchar(20) Unique, password varchar(32672), admin boolean, wins numeric(4), losses numeric(4), draws numeric(4));
 
 Create Table tournaments (tournamentId INT GENERATED ALWAYS AS IDENTITY primary key, name varchar(30), start_time timestamp, end_time timestamp);

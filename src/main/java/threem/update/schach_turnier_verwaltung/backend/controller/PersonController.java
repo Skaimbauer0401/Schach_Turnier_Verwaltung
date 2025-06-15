@@ -13,10 +13,16 @@ public class PersonController {
     private PersonService personService;
     private TournamentService tournamentService;
 
-    @GetMapping("/persons/getperson/${username}/{password}")
+    @GetMapping("/persons/getperson/{username}/{password}")
     public String getPerson(@PathVariable String username, @PathVariable String password) {
         personService = new PersonService();
         return personService.getPerson(username, password);
+    }
+
+    @GetMapping("/persons/getpersonenc/{username}/{password}")
+    public String getPersonEnc(@PathVariable String username, @PathVariable String password){
+        personService = new PersonService();
+        return personService.getPersonEnc(username, password);
     }
 
     @GetMapping("/persons/newperson/{username}/{password}/{adminkey}")

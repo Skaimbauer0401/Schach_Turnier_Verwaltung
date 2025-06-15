@@ -101,6 +101,87 @@ public class PersonService {
         }
     }
 
+    public String getPersonEnc(String username, String password){
+        try {
+            Connection con = databaseConnection();
+
+            PreparedStatement pstmt = null;
+            pstmt = con.prepareStatement("select * from persons WHERE username = ? AND password = ?");
+            pstmt.setString(1, username);
+            pstmt.setString(2, password);
+            ResultSet rsPerson = pstmt.executeQuery();
+            Person person = null;
+
+            if(rsPerson.next()) {
+                person = new Person(rsPerson.getInt("personId"), rsPerson.getString("username"), rsPerson.getString("password"), rsPerson.getBoolean("admin"), rsPerson.getInt("wins"), rsPerson.getInt("losses"), rsPerson.getInt("draws"));
+            }else{
+                return "Benutzername oder Passwort falsch";
+            }
+
+            PreparedStatement pstmtwins = con.prepareStatement("SELECT COUNT(matchid) FROM matches WHERE PLAYER1ID = ? AND RESULT = ?");
+            pstmtwins.setInt(1, person.getId());
+            pstmtwins.setString(2, "W");
+
+            PreparedStatement pstmtlosses = con.prepareStatement("SELECT COUNT(matchid) FROM matches WHERE PLAYER1ID = ? AND RESULT = ?");
+            pstmtlosses.setInt(1, person.getId());
+            pstmtlosses.setString(2, "L");
+
+            PreparedStatement pstmtdraws = con.prepareStatement("SELECT COUNT(matchid) FROM matches WHERE PLAYER1ID = ? AND RESULT = ?");
+            pstmtdraws.setInt(1, person.getId());
+            pstmtdraws.setString(2, "D");
+
+            ResultSet rswins = pstmtwins.executeQuery();
+            ResultSet rslosses = pstmtlosses.executeQuery();
+            ResultSet rsdraws = pstmtdraws.executeQuery();
+
+            rswins.next();
+            rslosses.next();
+            rsdraws.next();
+
+            person.setWins(rswins.getInt(1));
+            person.setLosses(rslosses.getInt(1));
+            person.setDraws(rsdraws.getInt(1));
+
+            PreparedStatement pstmtupdate = con.prepareStatement("UPDATE persons SET wins = ?, losses = ?, draws = ? WHERE personId = ?");
+            pstmtupdate.setInt(1, person.getWins());
+            pstmtupdate.setInt(2, person.getLosses());
+            pstmtupdate.setInt(3, person.getDraws());
+            pstmtupdate.setInt(4, person.getId());
+            pstmtupdate.executeUpdate();
+
+
+            String jsonPerson = toJson(person);
+
+            String jsonTournaments = "";
+
+            if (person.isAdmin()) {
+                Statement stmt = con.createStatement();
+                ResultSet rstournaments = stmt.executeQuery("SELECT * FROM tournaments");
+                while (rstournaments.next()) {
+                    Tournament tournament = new Tournament(rstournaments.getInt("tournamentId"), rstournaments.getString("name"), rstournaments.getTimestamp("start_time"), rstournaments.getTimestamp("end_time"));
+                    jsonTournaments += "," + toJson(tournament);
+                }
+            } else {
+                PreparedStatement ptournstmt = con.prepareStatement("SELECT DISTINCT t.* FROM PERSONS_TOURNAMENTS pt JOIN TOURNAMENTS t ON pt.TOURNAMENTID = t.TOURNAMENTID WHERE pt.personID = ?");
+                ptournstmt.setInt(1, person.getId());
+                ResultSet rstournaments = ptournstmt.executeQuery();
+                while (rstournaments.next()) {
+                    Tournament tournament = new Tournament(rstournaments.getInt("tournamentId"), rstournaments.getString("name"), rstournaments.getTimestamp("start_time"), rstournaments.getTimestamp("end_time"));
+                    jsonTournaments += "," + toJson(tournament);
+                }
+            }
+
+            rsPerson.close();
+            con.close();
+
+            return "[" + jsonPerson + jsonTournaments + "]";
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public String newPerson(String username, String password, String adminkey){
         Person person;
         try {
