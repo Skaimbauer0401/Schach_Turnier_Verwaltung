@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>♟️</text></svg>">
+    <title>Chess Match Matrix</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 10px;
+            background-color: #f5f5f5;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 20px);
+            overflow: hidden;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin: 5px 0;
+        }
+        h2#tournament-title {
+            color: #2196F3;
+            text-align: center;
+            margin: 5px 0;
+            font-size: 1.2em;
+        }
+        .description {
+            text-align: center;
+            margin-bottom: 10px;
+            padding: 5px;
+            background-color: #e9f7ef;
+            border-radius: 5px;
+        }
+        .controls {
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .player-input {
+            display: flex;
+            align-items: center;
+        }
+        input[type="text"] {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .matrix-container {
+            overflow: auto;
+            flex: 1;
+            min-height: 0;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 4px;
+            text-align: center;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+            position: sticky;
+            top: 0;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        .player-name {
+            font-weight: bold;
+            background-color: #4CAF50;
+            color: white;
+        }
+        .match-cell {
+            position: relative;
+        }
+        .match-cell.disabled {
+            background-color: #ddd;
+        }
+        .result-selector {
+            display: none;
+            position: absolute;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            z-index: 10;
+            width: 120px;
+            overflow: hidden;
+        }
+        .result-option {
+            padding: 10px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            text-align: center;
+            font-weight: bold;
+        }
+        .result-option:nth-child(1) {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .result-option:nth-child(2) {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .result-option:nth-child(3) {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .result-option:nth-child(4) {
+            background-color: #e2e3e5;
+            color: #383d41;
+        }
+        .result-option:hover {
+            filter: brightness(0.95);
+        }
+        .win {
+            color: green;
+            font-weight: bold;
+        }
+        .loss {
+            color: red;
+            font-weight: bold;
+        }
+        .draw {
+            color: orange;
+            font-weight: bold;
+        }
+        .not-played {
+            color: gray;
+            font-weight: bold;
+        }
+        .legend {
+            margin-top: 10px;
+            margin-bottom: 10px;
+            padding: 5px;
+            background-color: #f1f1f1;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+        .legend-item {
+            margin: 2px 0;
+        }
+        .legend-content {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Chess Match Matrix</h1>
+        <h2 id="tournament-title">Tournament: </h2>
+
+        <div class="description">
+            This matrix shows match results between players. Editing is disabled in this view.
+        </div>
+
+        <div class="controls">
+        </div>
+
+        <div class="legend">
+            <div class="legend-content" id="legend-content">
+                <div class="legend-item"><span class="win">← W</span> - Win (Row player won against Column player)</div>
+                <div class="legend-item"><span class="loss">← L</span> - Loss (Row player lost to Column player)</div>
+                <div class="legend-item"><span class="draw">← D</span> - Draw (Row player drew with Column player)</div>
+                <div class="legend-item"><span class="not-played">← N/A</span> - Not played</div>
+            </div>
+        </div>
+
+        <div class="matrix-container" style="padding-bottom: 20px;">
+            <table id="match-matrix">
+                <tr>
+                    <th>Players</th>
+                </tr>
+            </table>
+        </div>
+
+        <div class="button-container" style="margin-top: 20px; margin-bottom: 20px; display: flex; justify-content: center; gap: 10px;">
+            <button onclick="goBack()" style="background-color: #2196F3;">Back to Previous Page</button>
+        </div>
+    </div>
+
+    <script src="matrix_table.html"></script>
+</body>
+</html>

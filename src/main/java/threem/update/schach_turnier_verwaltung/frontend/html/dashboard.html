@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>♟️</text></svg>">
+    <title>Chess Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .welcome-message {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #e9f7ef;
+            border-radius: 5px;
+        }
+        .person-card, .tournaments-card {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e9f7ef;
+            border-radius: 5px;
+            border-left: 5px solid #4CAF50;
+        }
+        .profile-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .person-info {
+            margin-bottom: 10px;
+        }
+        .person-info span {
+            font-weight: bold;
+        }
+        .stats-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+        }
+        .stat-box {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            margin: 0 5px;
+            background-color: #f1f1f1;
+            border-radius: 5px;
+        }
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+        }
+        .tournament-list {
+            margin-top: 15px;
+        }
+        .tournament-item {
+            background-color: #f1f1f1;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border-left: 3px solid #4CAF50;
+        }
+        .tournament-name {
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+        .tournament-dates {
+            color: #666;
+            font-size: 14px;
+        }
+        .no-tournaments {
+            text-align: center;
+            color: #666;
+            padding: 15px;
+            background-color: #f1f1f1;
+            border-radius: 5px;
+        }
+        .logout-btn {
+            background-color: #f44336;
+            color: white;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .logout-btn:hover {
+            background-color: #d32f2f;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Chess Player Dashboard</h1>
+
+        <div class="welcome-message">
+            Welcome, <span id="welcome-username">Player</span>!
+        </div>
+
+        <div id="person-card" class="person-card">
+            <div class="profile-header">
+                <h2>Your Profile</h2>
+                <div style="display: flex; align-items: center;">
+                    <button class="logout-btn" onclick="logout()">Logout</button>
+                </div>
+            </div>
+            <div class="person-info">ID: <span id="person-id"></span></div>
+            <div class="person-info">Username: <span id="person-username"></span></div>
+
+            <div class="stats-container">
+                <div class="stat-box">
+                    <div class="stat-value" id="person-wins">0</div>
+                    <div class="stat-label">Wins</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="person-losses">0</div>
+                    <div class="stat-label">Losses</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="person-draws">0</div>
+                    <div class="stat-label">Draws</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="tournaments-card" class="tournaments-card">
+            <h2>Your Tournaments</h2>
+            <div id="tournament-list" class="tournament-list">
+                <div class="no-tournaments" id="no-tournaments">
+                    You are not participating in any tournaments yet.
+                </div>
+            </div>
+
+            <div style="margin-top: 20px; padding: 15px; background-color: #f1f1f1; border-radius: 5px;">
+                <h3>Join Tournament</h3>
+                <div style="display: flex; margin-bottom: 10px;">
+                    <input type="number" id="tournament-id" placeholder="Enter Tournament ID" style="flex: 1; padding: 8px; margin-right: 10px; border-radius: 4px; border: 1px solid #ccc;">
+                    <button onclick="addToTournament()" style="background-color: #4CAF50; color: white; padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer;">Join</button>
+                </div>
+                <div id="tournament-message" style="margin-top: 10px; padding: 8px; border-radius: 4px; display: none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="dashboard.html" defer></script>
+</body>
+</html>
